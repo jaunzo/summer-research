@@ -1,0 +1,31 @@
+User Manual (Version 1.0.0)
+
+------------------------------------------------------------------------------
+File Menu:
+
+File -> Enter network (Ctrl+N):
+Enter in a network in extended Newick format. Network string must contain at 
+least one labelled leaf and must end with semicolon.
+
+File -> Open network... (Ctrl+O):
+Opens a text file which contains a network in extended Newick format. Network 
+string must contain at least one labelled leaf and must end with semicolon.
+Text file must only contain ONE network.
+
+File -> Save as... -> Text file (Ctrl+Shift+T):
+Saves the network and trees represented in Newick format in a text file.
+
+File -> Save as... -> Images (Ctrl+Shift+I):
+Saves the network and tree graphs as a series of images in selected folder.
+
+------------------------------------------------------------------------------
+Toolbar:
+
+Select leaves:
+Generates trees displayed by the network that only contains the entered list 
+of leaves.
+
+Show trees:
+Opens a window that shows all unique trees with the number of occurences 
+displayed above each tree. By default, trees are displayed with all labelled 
+leaves.
