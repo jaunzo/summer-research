@@ -14,6 +14,7 @@ from widgets import (HoverButton)
 from phylonetwork import MalformedNewickException
 from dialogs import (MultiChoicePrompt, StringInputPrompt)
 import platform
+import webbrowser
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -142,6 +143,7 @@ class Program(Tk):
         self.help_menu = Menu(self.menu_bar, tearoff=0)
         self.help_menu.add_command(label="About", command=self.about)
         self.help_menu.add_command(label="Manual", command=self.manual)
+        self.help_menu.add_command(label="More info", command=self.open_github)
         self.menu_bar.add_cascade(label="Help", menu=self.help_menu)
         
         self.config(menu=self.menu_bar)
@@ -236,6 +238,10 @@ class Program(Tk):
             text_widget.pack(expand=True, fill="both")
             text_widget.config(state="disabled")
         
+    def open_github(self):
+        """Open this program's github page."""
+        webbrowser.open("https://github.com/jaunzo/summer-research", new=2)
+        
     def new_network(self, *_):
         """Displays dialog and gets network in extended newick format inputted by the user."""
         if self.enter_network_prompt:
@@ -311,7 +317,6 @@ class Program(Tk):
             
             self.graphics_enabled.set(0)
             self.graphics = False
-            
         
         
     def generate_trees(self):
