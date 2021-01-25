@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from widgets import (HoverButton)
 from phylonetwork import MalformedNewickException
 from dialogs import (MultiChoicePrompt, StringInputPrompt)
+import platform
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -197,7 +198,7 @@ class Program(Tk):
             scroll.pack(side="right", fill="y")
             text_widget.pack(expand=True, fill="both")
         
-    def new_network(self):
+    def new_network(self, *_):
         """Displays dialog and gets network in extended newick format inputted by the user."""
         if self.enter_network_prompt:
             self.enter_network_prompt.update()
@@ -206,7 +207,7 @@ class Program(Tk):
             self.enter_network_prompt = StringInputPrompt(self, "Enter network", "Enter network in extended newick format")
 
             
-    def open_network(self):
+    def open_network(self, *_):
         """Displays open file prompt and processes a text file that contains the network in extended newick format."""
         filename =  tkinter.filedialog.askopenfilename(initialdir = self.directory, title = "Open text file",
                                                        filetypes = (("text files","*.txt"),("all files","*.*")))
@@ -259,7 +260,7 @@ class Program(Tk):
         
         self._enable_save()
     
-    def save_text(self, event=None):
+    def save_text(self, *_):
         """Saves network and trees in newick format as a text file in the directory that the user specifies."""
         f =  tkinter.filedialog.asksaveasfile(initialdir = self.directory, title = "Saving network and trees as text file", 
                                       filetypes = [("Text file","*.txt")], 
@@ -276,7 +277,7 @@ class Program(Tk):
         f.write(file_contents)
         f.close()
         
-    def save_image(self, event=None):
+    def save_image(self, *_):
         """Saves all figures as a series of images in the directory that the user specifies."""
         directory = tkinter.filedialog.askdirectory(initialdir = self.directory, title = "Select directory to save images")
         
@@ -284,7 +285,7 @@ class Program(Tk):
         export_path = abs_path + directory 
 
         #Export network
-        if f is None: #if dialog closed with "cancel".
+        if directory is None: #if dialog closed with "cancel".
             return
         
         self.net_fig.savefig(export_path + "/network.png", bbox_inches="tight")
@@ -334,23 +335,26 @@ class Window(Toplevel):
         self.frame.bind("<Enter>", self._bound_to_mousewheel)
         self.frame.bind("<Leave>", self._unbound_to_mousewheel)
         
-    def _bound_to_mousewheel(self, event):
+    def _bound_to_mousewheel(self, *_):
         """Bind the mouse scroll wheel when cursor enters the window."""
         self.top_canvas.bind_all("<MouseWheel>", self._on_mousewheel)   
 
-    def _unbound_to_mousewheel(self, event):
+    def _unbound_to_mousewheel(self, *_):
         """Unbind the mouse scroll wheel when cursor exits the window."""
         self.top_canvas.unbind_all("<MouseWheel>") 
 
     def _on_mousewheel(self, event):
         """Configure scroll movement."""
-        self.top_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        if platform.system() == "Darwin": #If OS is Mac
+            self.top_canvas.yview_scroll(int(-1*(event.delta)), "units")
+        else:
+            self.top_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
         
     def __handle_canvas_resize(self, event):
         """Resize canvas when window is resized."""
         self.top_canvas.itemconfigure(self.scroll_window, width=event.width)
 
-    def __handle_frame_resize(self, event):
+    def __handle_frame_resize(self, *_):
         """Resize frame when window is resized."""
         self.top_canvas.configure(scrollregion=self.top_canvas.bbox("all"))
 
