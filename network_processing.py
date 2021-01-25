@@ -47,7 +47,7 @@ class Network:
     Class that uses the PhylogeneticNetwork class and handles generation of trees.
     Any labels of internal nodes are removed leaving only leaves labelled.
     """
-    def __init__(self, network_newick, network_figure):
+    def __init__(self, network_newick, network_figure=None):
         #Try except here
         self._original_network = pn.PhylogeneticNetwork(eNewick=network_newick)
         self._current_network = copy.deepcopy(self._original_network)
@@ -62,7 +62,6 @@ class Network:
         self._current_reticulations = list(self._current_network.reticulations)
         self.trees_dict = {} #Dictionary that stores the selected leaves and corresponding generated Trees object
 
-        self.draw()
         
     @cached_property
     def num_reticulations(self):

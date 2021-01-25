@@ -130,7 +130,7 @@ class StringInputPrompt(Toplevel):
         input_network = self.text_entry.get("1.0", "end").strip()
         
         try:
-            self.main.display_network(input_network)
+            self.main.generate_network(input_network)
             self._exit()
         
         except MalformedNewickException as e:

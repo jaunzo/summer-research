@@ -5,7 +5,7 @@ import tkinter.simpledialog
 import tkinter.filedialog
 import tkinter.messagebox
 from tkinter import (Tk, Canvas, Scrollbar, Menu, Toplevel,
-                     Frame, Label, Text)
+                     Frame, Label, Text, IntVar, Checkbutton)
 from network_processing import Network
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import sys, os
@@ -61,7 +61,7 @@ class Program(Tk):
         #initialise network figure canvas in main window
         self.net_fig = plt.figure("Input network")
         self.net_canvas = FigureCanvasTkAgg(self.net_fig, master=self.main_frame)
-        self.net_canvas.get_tk_widget().pack(side=tkinter.TOP, fill="both", expand=1)
+        
         
         #prompt windows
         self.enter_network_prompt = None
@@ -93,7 +93,10 @@ class Program(Tk):
         self.info_frame.pack(side="bottom", fill="x")
         
         self.info_label = Label(self.info_frame, text="")
-        self.info_label.pack(anchor="c")
+        self.info_label.pack(side="right", padx=(0,10))
+        
+        self.graphics_label = Label(self.info_frame, text="")
+        self.graphics_label.pack(side="left", padx=(10, 0))
         
     
     def _update_info_bar(self):
@@ -102,6 +105,13 @@ class Program(Tk):
         num_labelled_leaves = self.network.num_labelled_leaves
         info_text = f"{num_reticulations} reticulations, {num_labelled_leaves} labelled leaves"
         self.info_label["text"] = info_text
+        
+        if self.graphics:
+            graphics_text = "Graph visualisation enabled for this network"
+        else:
+            graphics_text = "Graph visualisation disabled for this network"
+        
+        self.graphics_label["text"] = graphics_text 
     
         
     def _initialise_menu_bar(self):
@@ -145,6 +155,18 @@ class Program(Tk):
         self.display_trees_button = HoverButton(self.toolbar, text ="Show trees", relief="raised",
                                                 command=self.display_trees, state="disabled")
         
+        self.graphics_enabled = IntVar()
+        self.graphics = False
+        self.graphics_check_box = Checkbutton(self.toolbar, text = "Enable graphics",
+                                              variable=self.graphics_enabled, command=self.set_graphics)
+        self.graphics_check_box.pack(side="right", padx=(0,10))
+        
+    def set_graphics(self, *_):
+        if self.graphics_enabled.get() == 1:
+            self.graphics = True
+        else:
+            self.graphics = False
+        
     def _enable_tree_tools(self):
         """For private use. Buttons involving trees are enabled when a network has successfully been processed and displayed."""
         self.select_leaves_button.config(state = "normal")
@@ -180,6 +202,7 @@ class Program(Tk):
             text_widget = Text(self.about_window)
             text_widget.insert("1.0", about_text)
             text_widget.pack(expand=True, fill="both")
+            text_widget.config(state="disabled")
     
     def manual(self):
         """Display program manual on window"""
@@ -197,6 +220,7 @@ class Program(Tk):
             text_widget['yscrollcommand'] = scroll.set
             scroll.pack(side="right", fill="y")
             text_widget.pack(expand=True, fill="both")
+            text_widget.config(state="disabled")
         
     def new_network(self, *_):
         """Displays dialog and gets network in extended newick format inputted by the user."""
@@ -213,7 +237,6 @@ class Program(Tk):
                                                        filetypes = (("text files","*.txt"),("all files","*.*")))
         if self.directory == "":
             #Set the directory to directory of file that was just opened
-            #self.directory = filename[:filename.rfind("/")]
             path = os.path.split(filename)
             self.directory = path[0]
             
@@ -224,23 +247,33 @@ class Program(Tk):
             if text != None:
                 network_newick = text[:text.find(";") + 1]
                 try:
-                    self.display_network(network_newick)
+                    self.generate_network(network_newick)
                 except MalformedNewickException:
                     error_message = "Could not read network.\n\nNetwork requirements:\nNetwork must contain at least one labelled leaf and string must terminate with semicolon."
                     tkinter.messagebox.showerror(title="Open network error", message=error_message)
         
-    def display_network(self, net_newick):
+    def generate_network(self, net_newick):
+        self.network = Network(net_newick, self.net_fig)
+        self._update_info_bar()
+        self._enable_tree_tools()
+        
+        if self.graphics:
+            self.net_canvas.get_tk_widget().pack(side=tkinter.TOP, fill="both", expand=1)
+            self.display_network()
+        else:
+            self.net_canvas.get_tk_widget().pack_forget()
+        
+        
+    def display_network(self):
         """Display input network in the main window."""
         if self._trees_window:
             self._trees_window.withdraw()
             
         self.net_fig.gca().clear()
         
-        self.network = Network(net_newick, self.net_fig)
+        self.network.draw()
         self.net_canvas.draw()
         
-        self._update_info_bar()
-        self._enable_tree_tools()
         
     def display_trees(self):
         """
