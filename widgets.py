@@ -21,13 +21,13 @@ class TextWithPlaceholder(Text):
         self.insert("1.0", self.placeholder)
         self["fg"] = self.placeholder_color
 
-    def focus_in(self, event):
+    def focus_in(self, *_):
         """Removes the placeholder text when user clicks on text field"""
         if self["fg"] == self.placeholder_color:
             self.delete("1.0", "end")
             self["fg"] = self.default_fg_color
 
-    def focus_out(self, event):
+    def focus_out(self, *_):
         """Put placeholder text in the text field if user clicks out of the text field and hasn"t typed in it"""
         string = self.get("1.0", "end").strip()
         if string == "":
