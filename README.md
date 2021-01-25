@@ -10,7 +10,8 @@ Python 3.8.6
 
 This program requires Graphviz to be installed. Instructions on how to install found [here](https://bobswift.atlassian.net/wiki/spaces/GVIZ/pages/20971549/How+to+install+Graphviz+software).
 
-Contents of requirements.txt
+
+### Contents of requirements.txt
 ```
 DendroPy==4.4.0
 networkx==2.5
