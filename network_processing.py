@@ -139,20 +139,24 @@ class Network:
         number_reticulations = len(self._current_reticulations)
         
         #Creating trees
-        new_networks = [[] for x in range(number_reticulations + 1)]
-        new_networks[0].append(self._current_network)
+#         new_networks = [[] for x in range(number_reticulations + 1)]
+#         new_networks[0].append(self._current_network)
+        prev_networks = [self._current_network]
 
         #Removing one edge per reticulation
         for i in range(number_reticulations):
+            new_networks = []
             reticulation = self._current_reticulations[i]
             
             for parent in self._current_network.predecessors(reticulation):
-                for prev_net in new_networks[i]:
+                for prev_net in prev_networks:
                     new_net = copy.deepcopy(prev_net)
                     new_net.remove_edge(parent, reticulation)
-                    new_networks[i+1].append(new_net)
+                    new_networks.append(new_net)
+                    
+            prev_networks = copy.deepcopy(new_networks)
         
-        return new_networks[-1] #array of PhylogeneticNetwork object
+        return prev_networks #array of PhylogeneticNetwork objects
         
     
     def process(self):

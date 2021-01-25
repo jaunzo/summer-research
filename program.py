@@ -441,18 +441,19 @@ class TreesWindow(Window):
     def _update_info_bar(self):
         """Update trees info"""
         num_unique_trees = self.main.trees.num_unique_trees
-        info_text = f"{num_unique_trees} distinct trees, {self.num_total_trees} total trees"
+        num_total_trees = self.main.network.total_trees
+        info_text = f"{num_unique_trees} distinct trees, {num_total_trees} total trees"
         self.info_label["text"] = info_text
       
         
     def _initialise_info_bar(self):
         """Setup info bar at bottom which displays number of trees"""
         info_frame = Frame(self)
-        self.num_total_trees = len(self.main.network.all_trees)
+        num_total_trees = self.main.network.total_trees
         info_frame.pack(side="bottom", fill="x")
         
         num_unique_trees = self.main.trees.num_unique_trees
-        info_text = f"{num_unique_trees} distinct trees, {self.num_total_trees} total trees"
+        info_text = f"{num_unique_trees} distinct trees, {num_total_trees} total trees"
         self.info_label = Label(info_frame, text=info_text)
         self.info_label.pack(anchor="c")
             
