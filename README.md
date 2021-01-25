@@ -6,7 +6,7 @@ the network in newick format and export the generated network as image files.
 
 Python 3.8.6
 
-###Installation requirements
+### Installation requirements
 
 This program requires Graphviz to be installed. Instructions on how to install found [here](https://bobswift.atlassian.net/wiki/spaces/GVIZ/pages/20971549/How+to+install+Graphviz+software).
 
