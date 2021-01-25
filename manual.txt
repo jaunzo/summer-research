@@ -29,3 +29,7 @@ Show trees:
 Opens a window that shows all unique trees with the number of occurences 
 displayed above each tree. By default, trees are displayed with all labelled 
 leaves.
+
+Enable graphics:
+Enabled: Network and trees will be drawn as graphs. Graphviz must be installed.
+Disabled: Network and trees will be printed as text on the main window.

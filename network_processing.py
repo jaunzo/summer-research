@@ -31,7 +31,6 @@ from cached_property import cached_property
 
 def create_graph(graph, ax):
     """Variant of draw method from phylonetwork library"""
-    #Variant of draw method from phylonetwork library
     import networkx as nx
     from networkx.drawing.nx_agraph import graphviz_layout
     pos = graphviz_layout(graph, prog="dot")
@@ -47,13 +46,14 @@ class Network:
     Class that uses the PhylogeneticNetwork class and handles generation of trees.
     Any labels of internal nodes are removed leaving only leaves labelled.
     """
-    def __init__(self, network_newick, network_figure=None):
-        #Try except here
+    def __init__(self, network_newick, network_figure, graphics):
         self._original_network = pn.PhylogeneticNetwork(eNewick=network_newick)
         self._current_network = copy.deepcopy(self._original_network)
         
         self._newick = network_newick
         self.figure = network_figure
+        
+        self.graphics = graphics
 
         self.set_current_selected_leaves(self.labelled_leaves)
         self.retain_labelled_leaves()
@@ -87,6 +87,14 @@ class Network:
                 
         labelled_leaves.sort()
         return labelled_leaves
+    
+    @cached_property
+    def text(self):
+        """Text of network details"""
+        contents = f"NETWORK:\n{self._newick}\n\n"
+        contents += f"Reticulations: {self.num_reticulations}\n"
+        contents += f"Network leaves:\n{self.labelled_leaves}\n"
+        return contents
     
     @property
     def newick(self):
@@ -139,8 +147,6 @@ class Network:
         number_reticulations = len(self._current_reticulations)
         
         #Creating trees
-#         new_networks = [[] for x in range(number_reticulations + 1)]
-#         new_networks[0].append(self._current_network)
         prev_networks = [self._current_network]
 
         #Removing one edge per reticulation
@@ -166,7 +172,7 @@ class Network:
             
         else:
             trees = Trees(self, self.current_selected_leaves)
-            trees.generate_trees()
+            trees.generate()
             
             self.trees_dict[trees.leaves] = trees
             return trees
@@ -198,23 +204,24 @@ class Trees:
     Class that handles the generation of displayed trees from network.
     """
     def __init__(self, network, leaves):
-        self.num_trees = {} #Dictionary of unique tree newicks with count
+        self.trees_data = {} #Dictionary of unique tree newicks with count
         self.tree_figs = []
         self.network = network
         self.tree_axes = {} #Dictionary of unique tree newicks with plot axes
         self._selected_leaves = leaves
         
-        self._dendropy_trees = []
-        
     @property
     def num_unique_trees(self):
         """Returns of unique trees"""
-        return len(self.num_trees)
+        return len(self.data)
         
     @property
     def data(self):
-        """Dictionary with the tree in newick format as the key and the number of occurences as the value."""
-        return self.num_trees
+        """
+        Dictionary with the tree in newick format as the key and the number of occurences
+        and phylonetwork object as the value.
+        """
+        return self.trees_data
         
     @property
     def figures(self):
@@ -225,11 +232,18 @@ class Trees:
     def leaves(self):
         """Leaves of the trees."""
         return tuple(self._selected_leaves)
+    
+    @cached_property
+    def text(self):
+        """Text representation of the network and the trees."""
+        contents = f"\n\nTREES\nLeaves\n{self._selected_leaves}\n\nTotal trees: {self.network.total_trees}\nDistinct trees: {self.num_unique_trees}\n\n"
         
-    def generate_trees(self):
-        """Get and plot all unique trees displayed by the given network with the number of occurence displayed above the plot."""
-        unique_tree_newicks = set()
+        for tree, data in self.trees_data.items():
+            contents += f"{tree}  x{data[0]}\n"
+            
+        return contents
         
+    def draw(self):
         unique_plot_count = 1
         unique_figure_count = 1
         
@@ -238,13 +252,47 @@ class Trees:
         
         rows = 1
         cols = 2
+        
+        for tree_newick, data in self.trees_data.items():
+            #Draw the output trees
+            #Display rows * cols trees per figure
+            if unique_plot_count > rows * cols:
+                
+                unique_figure_count += 1
+                unique_plot_count = 1
+                
+                #Close open figures
+                plt.close("all")
+                
+                #Create new figure
+                unique_trees_fig = plt.figure("Output trees (" + str(unique_figure_count) + ")")
+                
+                #Add new figure
+                self.tree_figs.append(unique_trees_fig)
+                
+            tree_ax = unique_trees_fig.add_subplot(rows, cols, unique_plot_count)
+            
+            #Store ax subplots to title later
+            self.tree_axes[tree_newick] = tree_ax
+            
+            create_graph(data[1], unique_trees_fig.gca())
+            unique_plot_count += 1
+                
+        #Add number above subplot
+        for tree_newick in self.trees_data.keys():
+            tree_ax = self.tree_axes[tree_newick]
+            tree_count = self.trees_data[tree_newick][0]
+            tree_ax.title.set_text(tree_count)
+    
+    def generate(self):
+        """Get and plot all unique trees displayed by the given network with the number of occurence displayed above the plot."""
+        unique_tree_newicks = set()
 
         for tree in self.network.all_trees:
             #Reduce tree
             tree.remove_elementary_nodes()
             tree_string = "[&R] " + tree.eNewick()
             dendro_tree = dendropy.Tree.get_from_string(tree_string,"newick")
-            self._dendropy_trees.append(dendro_tree)
             dendro_tree.retain_taxa_with_labels(self._selected_leaves)
             
             newick_string = dendro_tree.as_string(schema="newick")
@@ -260,44 +308,13 @@ class Trees:
             
             warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
             
-            
             #Check if tree is unique
             if tree_newick in unique_tree_newicks:
-                self.num_trees[tree_newick] += 1
+                self.trees_data[tree_newick][0] += 1
             
             elif tree_newick not in unique_tree_newicks:
-                self.num_trees[tree_newick] = 1
+                self.trees_data[tree_newick] = [1]
                 unique_tree_newicks.add(tree_newick)
-                
-                
-                #Draw the output trees
-                #Display rows * cols trees per figure
-                if unique_plot_count > rows * cols:
-                    
-                    unique_figure_count += 1
-                    unique_plot_count = 1
-                    
-                    #Close open figures
-                    plt.close("all")
-                    
-                    #Create new figure
-                    unique_trees_fig = plt.figure("Output trees (" + str(unique_figure_count) + ")")
-                    
-                    #Add new figure
-                    self.tree_figs.append(unique_trees_fig)
-                    
-                tree_ax = unique_trees_fig.add_subplot(rows, cols, unique_plot_count)
-                
-                #Store ax subplots to title later
-                self.tree_axes[tree_newick] = tree_ax
-                
-                create_graph(new_tree, unique_trees_fig.gca())
-                unique_plot_count += 1
-                
-        #Add number above subplot
-        for tree_newick in unique_tree_newicks:
-            tree_ax = self.tree_axes[tree_newick]
-            tree_count = self.num_trees[tree_newick]
-            tree_ax.title.set_text(tree_count)
-    
-    
+
+            self.trees_data[tree_newick].append(new_tree)
+            

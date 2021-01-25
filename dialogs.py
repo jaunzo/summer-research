@@ -3,6 +3,7 @@
 from tkinter import (Toplevel, Frame, Button, Label, IntVar, Radiobutton)
 from widgets import (TextWithPlaceholder, HoverButton)
 from phylonetwork import MalformedNewickException
+from network_processing import InvalidLeaves
 
 class MultiChoicePrompt(Toplevel):
     """Class that creates a multiple choice prompt window for selecting leaves."""
@@ -68,7 +69,7 @@ class MultiChoicePrompt(Toplevel):
                 raise InvalidLeaves
             
             self.main.network.set_current_selected_leaves(input_leaves)
-            self.main.display_trees()
+            self.main.generate_trees()
             self._exit()
             
         except InvalidLeaves as e:
@@ -153,7 +154,6 @@ class StringInputPrompt(Toplevel):
             opening_brackets = 0
             closing_brackets = 0
             
-            print("Check brackets")
             for character in input_network:
                 if character == "(":
                     opening_brackets += 1

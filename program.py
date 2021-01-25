@@ -160,7 +160,7 @@ class Program(Tk):
                                          command=self._select_leaves, state="disabled")
         
         self.display_trees_button = HoverButton(self.toolbar, text ="Show trees", relief="raised",
-                                                command=self.display_trees, state="disabled")
+                                                command=self.generate_trees, state="disabled")
         
         self.graphics_enabled = IntVar()
         self.graphics = False
@@ -169,6 +169,7 @@ class Program(Tk):
         self.graphics_check_box.pack(side="right", padx=(0,10))
         
     def set_graphics(self, *_):
+        """Set if the program draws the network and trees."""
         if self.graphics_enabled.get() == 1:
             self.graphics = True
         else:
@@ -182,6 +183,12 @@ class Program(Tk):
     def _enable_save(self):
         """For private use. Save functions are enabled when a network and trees has successfully been processed and displayed."""
         self.file_menu.entryconfigure("Save as...", state = "normal")
+        
+    def _enable_text_save(self):
+        """For private use. Used when visualisation is disabled. Only save as text enabled"""
+        self.file_menu.entryconfigure("Save as...", state = "normal")
+        self.save_sub_menu.entryconfigure("Images", state="disabled")
+        
         
     def _scale_window(self, window_length):
         """For private use. Scales the window based on calculated scale"""
@@ -259,8 +266,10 @@ class Program(Tk):
                     error_message = "Could not read network.\n\nNetwork requirements:\nNetwork must contain at least one labelled leaf and string must terminate with semicolon."
                     tkinter.messagebox.showerror(title="Open network error", message=error_message)
         
+        
     def generate_network(self, net_newick):
-        self.network = Network(net_newick, self.net_fig)
+        """Generate the network object and display it depending on graphics mode"""
+        self.network = Network(net_newick, self.net_fig, self.graphics)
         self._update_info_bar()
         self._enable_tree_tools()
         self.net_newick = net_newick
@@ -279,7 +288,7 @@ class Program(Tk):
         """Print out the network in main window"""
         self.main_text_widget.config(state="normal")
         self.main_text_widget.delete('1.0', "end")
-        self.main_text_widget.insert("1.0", f"Input network:\n{self.net_newick}\n\n")
+        self.main_text_widget.insert("1.0", self.network.text)
         self.main_text_widget.config(state="disabled")
         
         
@@ -293,22 +302,40 @@ class Program(Tk):
         self.network.draw()
         self.net_canvas.draw()
         
+    def generate_trees(self):
+        """Generate the tree objects and display them depending on graphics mode."""
+        #Get Trees object
+        self.trees = self.network.process()
         
+        if self.network.graphics:
+            self.display_trees()
+        else:
+            self.print_trees()
+        
+        
+    def print_trees(self):
+        """Displays trees generated as text in the main window"""
+        self.main_text_widget.config(state="normal")
+        self.main_text_widget.delete('1.0', "end")
+        self.main_text_widget.insert("1.0", self.network.text)
+        self.main_text_widget.insert("end", self.trees.text)
+        self.main_text_widget.config(state="disabled")
+        
+        self._enable_text_save()
+    
     def display_trees(self):
         """
         Displays trees in a window when user clicks "Show trees" or selects leaves. Only one trees window is
         displayed at a time
         """
-        #Get Trees object
-        self.trees = self.network.process()
+        self.trees.draw() #Draw the trees before calling the window
         
         if self._trees_window:
             self._trees_window.deiconify()
             self._trees_window.replace_trees(self.trees)
         else:
             #Create window
-            self._trees_window = TreesWindow(self, self.trees, width=self.scaled_width,
-                                  height=self.scaled_height, title="Trees")
+            self._trees_window = TreesWindow(self, self.trees, width=self.scaled_width, height=self.scaled_height, title="Trees")            
         
         self._enable_save()
     
@@ -321,12 +348,11 @@ class Program(Tk):
         if f is None: #if dialog closed with "cancel".
             return
         
-        file_contents = f"{self.network.newick}\n\nTotal trees: {self.network.total_trees}\nDistinct trees: {self.trees.num_unique_trees}\n\n"
-        
-        for tree, count in self.trees.data.items():
-            file_contents += f"{tree}  x{count}\n"
+        file_contents = self.network.text
+        file_contents += self.trees.text
         
         f.write(file_contents)
+        print(file_contents)
         f.close()
         
     def save_image(self, *_):
