@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from widgets import (HoverButton)
 from phylonetwork import MalformedNewickException
 from dialogs import (MultiChoicePrompt, StringInputPrompt)
+import platform
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -344,7 +345,10 @@ class Window(Toplevel):
 
     def _on_mousewheel(self, event):
         """Configure scroll movement."""
-        self.top_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        if platform.system() == "Darwin": #If OS is Mac
+            self.top_canvas.yview_scroll(int(-1*(event.delta)), "units")
+        else:
+            self.top_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
         
     def __handle_canvas_resize(self, event):
         """Resize canvas when window is resized."""
