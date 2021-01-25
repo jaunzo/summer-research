@@ -299,8 +299,20 @@ class Program(Tk):
             
         self.net_fig.gca().clear()
         
-        self.network.draw()
-        self.net_canvas.draw()
+        try:
+            self.network.draw()
+            self.net_canvas.draw()
+        except ValueError as e:
+            self.net_fig.clear()
+            self.net_canvas.get_tk_widget().pack_forget()
+            
+            error_message = f"Error: {e}\n\nGraphviz must be installed and it's executables must be in the system's PATH."
+            tkinter.messagebox.showerror(title="Open network error", message=error_message)
+            
+            self.graphics_enabled.set(0)
+            self.graphics = False
+            
+        
         
     def generate_trees(self):
         """Generate the tree objects and display them depending on graphics mode."""
