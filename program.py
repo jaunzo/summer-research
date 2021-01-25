@@ -62,12 +62,19 @@ class Program(Tk):
         self.net_fig = plt.figure("Input network")
         self.net_canvas = FigureCanvasTkAgg(self.net_fig, master=self.main_frame)
         
+        self._initialise_main_text_widget()
         
         #prompt windows
         self.enter_network_prompt = None
         self.select_leaves_prompt = None
         self.about_window = None
         self.manual_window = None
+    
+    def _initialise_main_text_widget(self):
+        self.main_text_widget = Text(self.main_frame, width=30)
+        scroll = Scrollbar(self.main_text_widget, command=self.main_text_widget.yview)
+        self.main_text_widget['yscrollcommand'] = scroll.set
+        scroll.pack(side="right", fill="y")
     
     @property
     def trees_window(self):
@@ -111,7 +118,7 @@ class Program(Tk):
         else:
             graphics_text = "Graph visualisation disabled for this network"
         
-        self.graphics_label["text"] = graphics_text 
+        self.graphics_label["text"] = graphics_text
     
         
     def _initialise_menu_bar(self):
@@ -256,12 +263,24 @@ class Program(Tk):
         self.network = Network(net_newick, self.net_fig)
         self._update_info_bar()
         self._enable_tree_tools()
+        self.net_newick = net_newick
         
         if self.graphics:
-            self.net_canvas.get_tk_widget().pack(side=tkinter.TOP, fill="both", expand=1)
+            self.main_text_widget.pack_forget()
+            self.net_canvas.get_tk_widget().pack(side="top", fill="both", expand=1)
             self.display_network()
         else:
             self.net_canvas.get_tk_widget().pack_forget()
+            self.main_text_widget.pack(expand=True, fill="both")
+            self.print_network()
+            
+            
+    def print_network(self):
+        """Print out the network in main window"""
+        self.main_text_widget.config(state="normal")
+        self.main_text_widget.delete('1.0', "end")
+        self.main_text_widget.insert("1.0", f"Input network:\n{self.net_newick}\n\n")
+        self.main_text_widget.config(state="disabled")
         
         
     def display_network(self):
@@ -334,7 +353,7 @@ class Program(Tk):
         MsgBox = tk.messagebox.askquestion ("Exit Application","Are you sure you want to exit the application?",
                                             icon = "warning")
         if MsgBox == "yes":
-            self.destroy()
+            sys.exit()
             
 
 class Window(Toplevel):
