@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from widgets import (HoverButton)
 from phylonetwork import MalformedNewickException
 from dialogs import (MultiChoicePrompt, StringInputPrompt)
+from widgets import ToolTip
 import platform
 import webbrowser
 
@@ -35,12 +36,11 @@ class Program(Tk):
         super().__init__()
         ORIGINAL_DPI = 96.0
         #Scale the window depending on current monitor's dpi
-        scale = self._get_dpi() / ORIGINAL_DPI
-        self.tk.call("tk", "scaling", scale + 0.5)
+        self.scale = self._get_dpi() / ORIGINAL_DPI
+        self.tk.call("tk", "scaling", self.scale + 0.5)
         
         self.net_frame = None
         self.directory = ""
-        self.scale = scale
         self.net_fig = None
         self._trees_window = None
         
@@ -68,8 +68,6 @@ class Program(Tk):
         #prompt windows
         self.enter_network_prompt = None
         self.select_leaves_prompt = None
-        self.about_window = None
-        self.manual_window = None
     
     def _initialise_main_text_widget(self):
         self.main_text_widget = Text(self.main_frame, width=30)
@@ -159,16 +157,19 @@ class Program(Tk):
         self.toolbar.pack(fill="x")
         
         self.select_leaves_button = HoverButton(self.toolbar, text ="Select leaves", relief="raised",
-                                         command=self._select_leaves, state="disabled")
+                                         command=self._select_leaves, state="disabled",
+                                                tooltip_text="Enter set leaves to be displayed in trees. By default, all labelled leaves in network are selected")
         
         self.display_trees_button = HoverButton(self.toolbar, text ="Show trees", relief="raised",
-                                                command=self.generate_trees, state="disabled")
+                                                command=self.generate_trees, state="disabled",
+                                                tooltip_text="Generate trees with currently selected leaves")
         
         self.graphics_enabled = IntVar()
         self.graphics = False
-        self.graphics_check_box = Checkbutton(self.toolbar, text = "Enable graphics",
+        graphics_check_box = Checkbutton(self.toolbar, text = "Enable graphics",
                                               variable=self.graphics_enabled, command=self.set_graphics)
-        self.graphics_check_box.pack(side="right", padx=(0,10))
+        graphics_check_box.pack(side="right", padx=(0,10))
+        graphics_tooltip = ToolTip(graphics_check_box, "Enable graph visualisation for the next entered network")
         
     def set_graphics(self, *_):
         """Set if the program draws the network and trees."""
