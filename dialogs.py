@@ -1,7 +1,7 @@
 """Module that contains classes for the dialogue boxes"""
 
 from tkinter import (Toplevel, Frame, Button, Label, IntVar, Radiobutton)
-from widgets import (TextWithPlaceholder, HoverButton)
+from widgets import (TextWithPlaceholder)
 from phylonetwork import MalformedNewickException
 from network_processing import InvalidLeaves
 
@@ -49,11 +49,11 @@ class MultiChoicePrompt(Toplevel):
         self.ok_button = Button(self, text="OK", width=20, command=self._get_input_leaves)
         self.ok_button.pack(pady=(20, 20))
         
-    def _text_focus_off(self, event):
+    def _text_focus_off(self, *_):
         """Removes focus from the TextWithPlaceholder object."""
         self.focus_set()
         
-    def _text_on_click(self, event):
+    def _text_on_click(self, *_):
         """Automatically selects the "Customise" radio button when user clicks on text field"""
         self.v.set(1)
         
@@ -134,7 +134,7 @@ class StringInputPrompt(Toplevel):
             self.main.generate_network(input_network)
             self._exit()
         
-        except MalformedNewickException as e:
+        except MalformedNewickException:
             print("MalformedNewickException")
             print("Input not empty check")
             if not input_network or input_network == self.example_network:

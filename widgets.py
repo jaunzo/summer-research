@@ -67,7 +67,7 @@ class HoverButton(Button):
             self.tooltip.unschedule()
             self.tooltip.hidetip()
             
-    def _button_press(self, event):
+    def _button_press(self, *_):
         """Hide tooltip on button press"""
         if self.tooltip:
             self.tooltip.unschedule()
@@ -97,7 +97,7 @@ class ToolTip:
         """Schedule tooltip on mouse enter"""
         self.schedule(event)
 
-    def _on_leave(self, event=None):
+    def _on_leave(self, *_):
         """Hide tooltip on mouse leave"""
         self.unschedule()
         self.hidetip()
@@ -115,10 +115,8 @@ class ToolTip:
 
     def showtip(self, event):
         """Show tooltip message"""
-        x = y = 0
-        x, y, cx, cy = self.widget.bbox("insert")
-        x += self.widget.winfo_rootx() + event.x + 10
-        y += self.widget.winfo_rooty() + event.y + 15
+        x = self.widget.winfo_rootx() + event.x + 10
+        y = self.widget.winfo_rooty() + event.y + 15
         
         # creates a toplevel window
         self.tooltip_window = Toplevel(self.widget)

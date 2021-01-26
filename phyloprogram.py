@@ -169,7 +169,7 @@ class Program(Tk):
         graphics_check_box = Checkbutton(self.toolbar, text = "Enable graphics",
                                               variable=self.graphics_enabled, command=self.set_graphics)
         graphics_check_box.pack(side="right", padx=(0,10))
-        graphics_tooltip = ToolTip(graphics_check_box, "Enable graph visualisation for the next entered network")
+        ToolTip(graphics_check_box, "Enable graph visualisation for the next entered network")
         
     def set_graphics(self, *_):
         """Set if the program draws the network and trees."""
@@ -208,35 +208,29 @@ class Program(Tk):
             
     def about(self):
         """Display overview of program on window"""
-        if self.about_window and self.about_window.winfo_exists():
-            self.about_window.deiconify()
-        else:
-            self.about_window = Window(title="About")
-            path = resource_path("about.txt")
-            f = open(path, "r")
-            about_text = f.read()
-            text_widget = Text(self.about_window)
-            text_widget.insert("1.0", about_text)
-            text_widget.pack(expand=True, fill="both")
-            text_widget.config(state="disabled")
+        self.about_window = Window(title="About")
+        path = resource_path("about.txt")
+        f = open(path, "r")
+        about_text = f.read()
+        text_widget = Text(self.about_window)
+        text_widget.insert("1.0", about_text)
+        text_widget.pack(expand=True, fill="both")
+        text_widget.config(state="disabled")
     
     def manual(self):
         """Display program manual on window"""
-        if self.manual_window and self.manual_window.winfo_exists():
-            self.manual_window.deiconify()
-        else:
-            self.manual_window = Window(title="Manual", width=self.scaled_width,
-                                        height=self.scaled_height//2)
-            path = resource_path("manual.txt")
-            f = open(path, "r")
-            manual_text = f.read()
-            text_widget = Text(self.manual_window, width=30)
-            text_widget.insert("1.0", manual_text)
-            scroll = Scrollbar(text_widget, command=text_widget.yview)
-            text_widget['yscrollcommand'] = scroll.set
-            scroll.pack(side="right", fill="y")
-            text_widget.pack(expand=True, fill="both")
-            text_widget.config(state="disabled")
+        self.manual_window = Window(title="Manual", width=self.scaled_width,
+                                    height=self.scaled_height//2)
+        path = resource_path("manual.txt")
+        f = open(path, "r")
+        manual_text = f.read()
+        text_widget = Text(self.manual_window, width=30)
+        text_widget.insert("1.0", manual_text)
+        scroll = Scrollbar(text_widget, command=text_widget.yview)
+        text_widget['yscrollcommand'] = scroll.set
+        scroll.pack(side="right", fill="y")
+        text_widget.pack(expand=True, fill="both")
+        text_widget.config(state="disabled")
         
     def open_github(self):
         """Open this program's github page."""
