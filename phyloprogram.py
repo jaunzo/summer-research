@@ -303,7 +303,7 @@ class Program(Tk):
         try:
             self.network.draw()
             self.net_canvas.draw()
-        except ValueError as e:
+        except (ValueError, ImportError) as e:
             self.net_fig.clear()
             self.net_canvas.get_tk_widget().pack_forget()
             
