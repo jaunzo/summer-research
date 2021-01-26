@@ -132,7 +132,9 @@ class Program(Tk):
         self.save_sub_menu = Menu(self.file_menu, tearoff=0)
         self.save_sub_menu.add_command(label="Text file", command=self.save_text, accelerator="Ctrl+Shift+T")
         self.save_sub_menu.add_command(label="Images", command=self.save_image, accelerator="Ctrl+Shift+I")
-        self.file_menu.add_cascade(label="Save as...", menu=self.save_sub_menu, state="disabled")
+        self.file_menu.add_cascade(label="Save as...", menu=self.save_sub_menu)
+        self.file_menu.entryconfigure("Save as...", state = "disabled")
+        self.save_sub_menu.entryconfigure("Images", state="disabled")
         
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Exit", command=self._exit)
@@ -186,6 +188,7 @@ class Program(Tk):
     def _enable_save(self):
         """For private use. Save functions are enabled when a network and trees has successfully been processed and displayed."""
         self.file_menu.entryconfigure("Save as...", state = "normal")
+        self.save_sub_menu.entryconfigure("Images", state="normal")
         
     def _enable_text_save(self):
         """For private use. Used when visualisation is disabled. Only save as text enabled"""
@@ -286,7 +289,11 @@ class Program(Tk):
             
             
     def print_network(self):
-        """Print out the network in main window"""
+        """Print out the network in main window. Hide tree window"""
+        if self._trees_window:
+            self._trees_window.destroy()
+            self._trees_window = None
+        
         self.main_text_widget.config(state="normal")
         self.main_text_widget.delete('1.0', "end")
         self.main_text_widget.insert("1.0", self.network.text)
