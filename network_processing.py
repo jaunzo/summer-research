@@ -59,7 +59,7 @@ class Network:
         self.retain_labelled_leaves()
                 
         #Get reticulations
-        self._current_reticulations = list(self._current_network.reticulations)
+        self._current_reticulations = tuple(self._current_network.reticulations)
         self.trees_dict = {} #Dictionary that stores the selected leaves and corresponding generated Trees object
 
         
@@ -207,7 +207,6 @@ class Trees:
         self.trees_data = {} #Dictionary of unique tree newicks with count
         self.tree_figs = []
         self.network = network
-        self.tree_axes = {} #Dictionary of unique tree newicks with plot axes
         self._selected_leaves = leaves
         
     @property
@@ -244,8 +243,8 @@ class Trees:
         return contents
         
     def draw(self):
+        tree_axes = {} #Dictionary of unique tree newicks with plot axes
         unique_plot_count = 1
-        unique_figure_count = 1
         
         unique_trees_fig = plt.figure("Output trees")
         self.tree_figs.append(unique_trees_fig)
@@ -258,14 +257,13 @@ class Trees:
             #Display rows * cols trees per figure
             if unique_plot_count > rows * cols:
                 
-                unique_figure_count += 1
                 unique_plot_count = 1
                 
                 #Close open figures
                 plt.close("all")
                 
                 #Create new figure
-                unique_trees_fig = plt.figure("Output trees (" + str(unique_figure_count) + ")")
+                unique_trees_fig = plt.figure()
                 
                 #Add new figure
                 self.tree_figs.append(unique_trees_fig)
@@ -273,14 +271,14 @@ class Trees:
             tree_ax = unique_trees_fig.add_subplot(rows, cols, unique_plot_count)
             
             #Store ax subplots to title later
-            self.tree_axes[tree_newick] = tree_ax
+            tree_axes[tree_newick] = tree_ax
             
             create_graph(data[1], unique_trees_fig.gca())
             unique_plot_count += 1
                 
         #Add number above subplot
         for tree_newick in self.trees_data.keys():
-            tree_ax = self.tree_axes[tree_newick]
+            tree_ax = tree_axes[tree_newick]
             tree_count = self.trees_data[tree_newick][0]
             tree_ax.title.set_text(tree_count)
     
