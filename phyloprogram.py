@@ -44,7 +44,7 @@ class Program(Tk):
         self.net_fig = None
         self._trees_window = None
         
-        self.title("Phylogenetic network")
+        self.title("PhyloProgram")
         
         self.scaled_width = self._scale_window(750)
         self.scaled_height = self._scale_window(600)
