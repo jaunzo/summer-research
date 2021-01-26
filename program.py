@@ -101,23 +101,23 @@ class Program(Tk):
         self.info_label = Label(self.info_frame, text="")
         self.info_label.pack(side="right", padx=(0,10))
         
-        self.graphics_label = Label(self.info_frame, text="")
-        self.graphics_label.pack(side="left", padx=(10, 0))
+        self.network_label = Label(self.info_frame, text="")
+        self.network_label.pack(side="left", padx=(10, 0))
         
     
-    def _update_info_bar(self):
+    def _update_info_bar(self, filename):
         """For private use. Update the network info when new network is opened"""
         num_reticulations = self.network.num_reticulations
         num_labelled_leaves = self.network.num_labelled_leaves
         info_text = f"{num_reticulations} reticulations, {num_labelled_leaves} labelled leaves"
         self.info_label["text"] = info_text
         
-        if self.graphics:
-            graphics_text = "Graph visualisation enabled for this network"
+        if filename:
+            network_text = filename
         else:
-            graphics_text = "Graph visualisation disabled for this network"
+            network_text = ""
         
-        self.graphics_label["text"] = graphics_text
+        self.network_label["text"] = network_text
     
         
     def _initialise_menu_bar(self):
@@ -209,7 +209,6 @@ class Program(Tk):
     def about(self):
         """Display overview of program on window"""
         if self.about_window and self.about_window.winfo_exists():
-            print("deiconified")
             self.about_window.deiconify()
         else:
             self.about_window = Window(title="About")
@@ -256,10 +255,11 @@ class Program(Tk):
         """Displays open file prompt and processes a text file that contains the network in extended newick format."""
         filename =  tkinter.filedialog.askopenfilename(initialdir = self.directory, title = "Open text file",
                                                        filetypes = (("text files","*.txt"),("all files","*.*")))
-        if self.directory == "":
-            #Set the directory to directory of file that was just opened
-            path = os.path.split(filename)
-            self.directory = path[0]
+#         if self.directory == "":
+#             #Set the directory to directory of file that was just opened
+        path = os.path.split(filename)
+        self.directory = path[0]
+        text_file = path[1]
             
         if filename != "":
             f = open(filename, "r")
@@ -268,16 +268,16 @@ class Program(Tk):
             if text != None:
                 network_newick = text[:text.find(";") + 1]
                 try:
-                    self.generate_network(network_newick)
+                    self.generate_network(network_newick, text_file)
                 except MalformedNewickException:
                     error_message = "Could not read network.\n\nNetwork requirements:\nNetwork must contain at least one labelled leaf and string must terminate with semicolon."
                     tkinter.messagebox.showerror(title="Open network error", message=error_message)
         
         
-    def generate_network(self, net_newick):
+    def generate_network(self, net_newick, filename=None):
         """Generate the network object and display it depending on graphics mode"""
         self.network = Network(net_newick, self.net_fig, self.graphics)
-        self._update_info_bar()
+        self._update_info_bar(filename)
         self._enable_tree_tools()
         self.net_newick = net_newick
         
@@ -370,7 +370,6 @@ class Program(Tk):
         file_contents += self.trees.text
         
         f.write(file_contents)
-        print(file_contents)
         f.close()
         
     def save_image(self, *_):
