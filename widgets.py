@@ -106,6 +106,7 @@ class ToolTip:
         """Show tooltip after a certain number of milliseconds"""
         self.unschedule()
         self.id = self.widget.after(self.waittime, self.showtip(event))
+        
 
     def unschedule(self):
         """Cancel schedule of tooltip display"""
@@ -123,9 +124,13 @@ class ToolTip:
         # Leaves only the label and removes the app window
         self.tooltip_window.wm_overrideredirect(True)
         self.tooltip_window.wm_geometry("+%d+%d" % (x, y))
+        
         label = Label(self.tooltip_window, text=self.text, justify='left', relief='solid',
                        wraplength = self.wraplength, borderwidth=1)
         label.pack(ipadx=10, ipady=10)
+        
+        self.tooltip_window.update_idletasks()
+        self.tooltip_window.lift()
 
     def hidetip(self):
         """Hide tooltip when mouse leaves or clicks button"""
