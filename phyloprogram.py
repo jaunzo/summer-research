@@ -156,6 +156,7 @@ class Program(Tk):
         
         self.file_menu.bind("<<MenuSelect>>", self._file_menu_tooltip)
         self.help_menu.bind("<<MenuSelect>>", self._help_menu_tooltip)
+        self.save_sub_menu.bind("<<MenuSelect>>", self._save_sub_menu_tooltip)
         self.menu_tooltip = None
 
         
@@ -182,6 +183,20 @@ class Program(Tk):
         if self.call(event.widget, "index", "active") == 2:
             self.menu_tooltip = ToolTip(self.file_menu, text="Opens Github page", bind=False)
             self.menu_tooltip.schedule(event)
+            
+    def _save_sub_menu_tooltip(self, event):
+        """For private use. Handles tooltips for save menu"""
+        if self.menu_tooltip:
+            self.menu_tooltip._on_leave()
+    
+        if self.call(event.widget, "index", "active") == 0:
+            self.menu_tooltip = ToolTip(self.file_menu, text="Save network and trees in Newick text", bind=False)
+            self.menu_tooltip.schedule(event)
+            
+        if self.call(event.widget, "index", "active") == 1:
+            self.menu_tooltip = ToolTip(self.file_menu, text="Save network and tree graphs as a series of images", bind=False)
+            self.menu_tooltip.schedule(event)
+        
         
     def _initialise_tool_bar(self):
         """For private use. Initialise the tool bar"""
@@ -306,6 +321,7 @@ class Program(Tk):
         self._update_info_bar(filename)
         self._enable_tree_tools()
         self.net_newick = net_newick
+        print(sys.getrefcount(self._trees_window))
         
         if self.graphics:
             self.main_text_widget.pack_forget()
@@ -552,7 +568,7 @@ class TreesWindow(Window):
     def _exit(self):
         """Hide window"""
         self.main.trees_window = None
-        self.withdraw()
+        self.destroy()
         
 
 if __name__ == "__main__":

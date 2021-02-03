@@ -87,7 +87,7 @@ class ToolTip:
         if bind: #Bind events to widget if the widget doesn't already have any event handling functions
             #Binding events to a widget that its own event handling may have conflicts
             self.widget.bind("<Enter>", self._on_enter)
-            #self.widget.bind("<Leave>", self._on_leave)
+            self.widget.bind("<Leave>", self._on_leave)
             self.widget.bind("<ButtonPress>", self._on_leave)
             
         self.id = None
@@ -104,6 +104,7 @@ class ToolTip:
         
     def _on_enter_tooltip(self, *_):
         print("Tooltip hide")
+        
         self.unschedule()
         self.hidetip()
 
@@ -127,7 +128,9 @@ class ToolTip:
         # creates a toplevel window
         self.tooltip_window = Toplevel(self.widget)
         self.tooltip_window.attributes('-topmost', 'true')
+        
         self.tooltip_window.bind("<Enter>", self._on_enter_tooltip)
+        
         # Leaves only the label and removes the app window
         self.tooltip_window.wm_overrideredirect(True)
         self.tooltip_window.wm_geometry("+%d+%d" % (x, y))

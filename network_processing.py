@@ -88,7 +88,7 @@ class Network:
         labelled_leaves.sort()
         return labelled_leaves
     
-    @cached_property
+    @property
     def text(self):
         """Text of network details"""
         contents = f"NETWORK:\n{self._newick}\n\n"
@@ -227,7 +227,7 @@ class Trees:
         """Figures of the trees."""
         return self.tree_figs
     
-    @cached_property
+    @property
     def leaves(self):
         """Leaves of the trees."""
         return tuple(self._selected_leaves)
