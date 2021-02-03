@@ -153,6 +153,36 @@ class Program(Tk):
         self.bind_all("<Control-T>", self.save_text)
         self.bind_all("<Control-I>", self.save_image)
         
+        
+        self.file_menu.bind("<<MenuSelect>>", self._file_menu_tooltip)
+        self.help_menu.bind("<<MenuSelect>>", self._help_menu_tooltip)
+        self.menu_tooltip = None
+
+        
+    def _file_menu_tooltip(self, event):
+        """For private use. Handles tooltips for file menu"""
+        
+        if self.menu_tooltip:
+            self.menu_tooltip._on_leave()
+        
+        if self.call(event.widget, "index", "active") == 0:
+            self.menu_tooltip = ToolTip(self.file_menu, text="Manually enter a network in extended Newick format", bind=False)
+            self.menu_tooltip.schedule(event)
+            
+        elif self.call(event.widget, "index", "active") == 1:
+            self.menu_tooltip = ToolTip(self.file_menu, text="Open file containing a network in extended Newick format", bind=False)
+            self.menu_tooltip.schedule(event)
+    
+    
+    def _help_menu_tooltip(self, event):
+        """For private use. Handles tooltips for help menu"""
+        if self.menu_tooltip:
+            self.menu_tooltip._on_leave()
+    
+        if self.call(event.widget, "index", "active") == 2:
+            self.menu_tooltip = ToolTip(self.file_menu, text="Opens Github page", bind=False)
+            self.menu_tooltip.schedule(event)
+        
     def _initialise_tool_bar(self):
         """For private use. Initialise the tool bar"""
         self.toolbar = Frame(self, bd=1, relief="raised")
@@ -252,8 +282,7 @@ class Program(Tk):
         """Displays open file prompt and processes a text file that contains the network in extended newick format."""
         filename =  tkinter.filedialog.askopenfilename(initialdir = self.directory, title = "Open text file",
                                                        filetypes = (("text files","*.txt"),("all files","*.*")))
-#         if self.directory == "":
-#             #Set the directory to directory of file that was just opened
+
         path = os.path.split(filename)
         self.directory = path[0]
         text_file = path[1]

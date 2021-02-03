@@ -78,7 +78,7 @@ class ToolTip:
     Create a tooltip for a given widget
     Class code based from https://stackoverflow.com/questions/3221956/how-do-i-display-tooltips-in-tkinter
     """
-    def __init__(self, widget, text, bind=True):
+    def __init__(self, widget, text="Test", bind=True):
         self.waittime = 500     #miliseconds
         self.wraplength = 400   #pixels
         self.widget = widget
@@ -87,7 +87,7 @@ class ToolTip:
         if bind: #Bind events to widget if the widget doesn't already have any event handling functions
             #Binding events to a widget that its own event handling may have conflicts
             self.widget.bind("<Enter>", self._on_enter)
-            self.widget.bind("<Leave>", self._on_leave)
+            #self.widget.bind("<Leave>", self._on_leave)
             self.widget.bind("<ButtonPress>", self._on_leave)
             
         self.id = None
@@ -101,11 +101,16 @@ class ToolTip:
         """Hide tooltip on mouse leave"""
         self.unschedule()
         self.hidetip()
+        
+    def _on_enter_tooltip(self, *_):
+        print("Tooltip hide")
+        self.unschedule()
+        self.hidetip()
 
-    def schedule(self, event):
+    def schedule(self, event, **kwargs):
         """Show tooltip after a certain number of milliseconds"""
         self.unschedule()
-        self.id = self.widget.after(self.waittime, self.showtip(event))
+        self.id = self.widget.after(self.waittime, self.showtip(event, **kwargs))
         
 
     def unschedule(self):
@@ -114,13 +119,15 @@ class ToolTip:
             self.widget.after_cancel(self.id)
             self.id = None
 
-    def showtip(self, event):
+    def showtip(self, event, x=None, y=None):
         """Show tooltip message"""
-        x = self.widget.winfo_rootx() + event.x + 10
-        y = self.widget.winfo_rooty() + event.y + 15
+        x = self.widget.winfo_pointerx() - self.widget.winfo_vrootx() + 15
+        y = self.widget.winfo_pointery() - self.widget.winfo_vrooty() + 15
         
         # creates a toplevel window
         self.tooltip_window = Toplevel(self.widget)
+        self.tooltip_window.attributes('-topmost', 'true')
+        self.tooltip_window.bind("<Enter>", self._on_enter_tooltip)
         # Leaves only the label and removes the app window
         self.tooltip_window.wm_overrideredirect(True)
         self.tooltip_window.wm_geometry("+%d+%d" % (x, y))
