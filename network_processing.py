@@ -171,7 +171,7 @@ class Network:
             return self.trees_dict[self.current_selected_leaves]
             
         else:
-            trees = Trees(self, self.current_selected_leaves)
+            trees = EmbeddedTrees(self, self.current_selected_leaves)
             trees.generate()
             
             self.trees_dict[trees.leaves] = trees
@@ -199,7 +199,7 @@ class InvalidLeaves(Exception):
         self.message = message
         super().__init__(self.message)
     
-class Trees:
+class EmbeddedTrees:
     """
     Class that handles the generation of displayed trees from network.
     """

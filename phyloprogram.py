@@ -70,7 +70,7 @@ class Program(Tk):
         self.select_leaves_prompt = None
     
     def _initialise_main_text_widget(self):
-        self.main_text_widget = Text(self.main_frame, width=30)
+        self.main_text_widget = Text(self.main_frame, width=25)
         scroll = Scrollbar(self.main_text_widget, command=self.main_text_widget.yview)
         self.main_text_widget['yscrollcommand'] = scroll.set
         scroll.pack(side="right", fill="y")
