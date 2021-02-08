@@ -55,10 +55,19 @@ def rspr(tree1, tree2):
     
     length = len(output_list)
     
-    print(output_list[length - 3:length])
+    
+    forest = output_list[length - 3]
+    distance = output_list[-1].split()
+    distance = distance[-1]
+    equals_index = distance.index("=")
+    distance = int(distance[equals_index+1:])
+    
+    clusters = forest.split()[2:]
+    
+    return (distance, clusters)
     
     
 if __name__ == "__main__":
     tree1 = "(((1,2),3),4);"
     tree2 = "(((1,4),2),3);"
-    rspr(tree1, tree2)
+    print(rspr(tree1, tree2))
