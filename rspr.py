@@ -1,65 +1,64 @@
-"""Module that handles the generation of trees displayed by input network"""
+"""
+Module that runs external executable compiled from cwhidden's rSPR program which calculates rSPR.
 
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
+Source code for rspr executable:
+https://github.com/cwhidden/rspr
 
-##############################################################################
-##  DendroPy Phylogenetic Computing Library.
-##
-##  Copyright 2010-2015 Jeet Sukumaran and Mark T. Holder.
-##  All rights reserved.
-##
-##  See "LICENSE.rst" for terms and conditions of usage.
-##
-##  If you use this work or any portion thereof in published work,
-##  please cite it as:
-##
-##     Sukumaran, J. and M. T. Holder. 2010. DendroPy: a Python library
-##     for phylogenetic computing. Bioinformatics 26: 1569-1571.
-##
-##############################################################################
+Copyright 2009-2014 Chris Whidden
+whidden@cs.dal.ca
+http://kiwi.cs.dal.ca/Software/RSPR
+April 29, 2014
+Version 1.2.2
 
-from phylonetwork import PhylogeneticNetwork
-import matplotlib.pyplot as plt
-import warnings
-import matplotlib.cbook
+rspr is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-from cached_property import cached_property
+rspr is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
+You should have received a copy of the GNU General Public License
+along with rspr.  If not, see <http://www.gnu.org/licenses/>.
 
-def create_graph(graph, ax):
-    """Variant of draw method from phylonetwork library"""
-    import networkx as nx
-    from networkx.drawing.nx_agraph import graphviz_layout
-    pos = graphviz_layout(graph, prog="dot")
-    nx.draw_networkx_nodes(graph, pos, graph.tree_nodes, node_size=200, node_color="#57f542", ax=ax)
-    nx.draw_networkx_nodes(graph, pos, graph.reticulations, node_size=150, node_shape="s", node_color="#57f542", ax=ax)
-    nx.draw_networkx_edges(graph, pos, ax=ax)
-    nx.draw_networkx_labels(graph, pos, ax=ax, labels=graph.labeling_dict)
+"""
 
+import platform
+import subprocess
+from subprocess import PIPE
+
+def rspr(tree1, tree2):
+    """
+    Runs an external executable that calculates the rspr of 2 binary
+    phylogenetic trees
+    """
+
+    input_string = tree1 + "\n" + tree2
     
-class Tree(PhylogeneticNetwork):
-    """
-    Class that handles the trees.
-    """
-    def __init__(self, newick):
-        super().__init__(newick)
+    if platform.system() == "Windows":
+        executable = subprocess.Popen(executable="rspr.exe", args="", stdin=PIPE,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                               universal_newlines=True, shell=True)
+
+    out, err = executable.communicate(input=input_string)
+    
+    out = out.strip()
+    output_list = out.split("\n")
+    
+    if err:
+        print("test")
         
-    def draw(self):
-        figure = plt.figure()
-        create_graph(self, figure.gca())
-        
-        return figure
-        
-        
+    executable.wait()
+    executable.terminate()
+    
+    length = len(output_list)
+    
+    print(output_list[length - 3:length])
+    
+    
 if __name__ == "__main__":
-    tree1_newick = "((A,B),(C,(D,E)));"
-    tree2_newick = "((A,C),(D,(B,E)));"
-    tree1 = Tree(tree1_newick)
-    tree2 = Tree(tree2_newick)
-    
-    fig1 = tree1.draw()
-    fig2 = tree2.draw()
-    
-    plt.show()
-            
+    tree1 = "(((1,2),3),4);"
+    tree2 = "(((1,4),2),3);"
+    rspr(tree1, tree2)
