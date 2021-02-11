@@ -19,7 +19,7 @@
 ##
 ##############################################################################
 
-import phylonetwork as pn
+from phylonetwork import PhylogeneticNetwork
 import matplotlib.pyplot as plt
 import copy
 import dendropy
@@ -47,7 +47,7 @@ class Network:
     Any labels of internal nodes are removed leaving only leaves labelled.
     """
     def __init__(self, network_newick, network_figure, graphics):
-        self._original_network = pn.PhylogeneticNetwork(eNewick=network_newick)
+        self._original_network = PhylogeneticNetwork(eNewick=network_newick)
         self._current_network = copy.deepcopy(self._original_network)
         
         self._newick = network_newick
@@ -301,7 +301,7 @@ class EmbeddedTrees:
                 index = newick_string.index(";")
                 new_string = newick_string[index - 1: index + 1]
             
-            new_tree = pn.PhylogeneticNetwork(eNewick=new_string)
+            new_tree = PhylogeneticNetwork(eNewick=new_string)
             tree_newick = new_tree.eNewick()
             
             warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)

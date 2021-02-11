@@ -7,17 +7,21 @@ class TextWithPlaceholder(Text):
     def __init__(self, master, placeholder, placeholder_colour="grey", **kwargs):
         super().__init__(master, **kwargs)
 
-        self.placeholder = placeholder
         self.placeholder_color = placeholder_colour
         self.default_fg_color = self["fg"]
+        self.placeholder = placeholder
 
         self.bind("<FocusIn>", self.focus_in)
         self.bind("<FocusOut>", self.focus_out)
 
-        self._put_placeholder()
+        self.put_placeholder(placeholder)
 
-    def _put_placeholder(self):
+    def put_placeholder(self, placeholder=None):
         """Inserts placeholder text in text field."""
+        self.delete('1.0', "end")
+        if placeholder:
+            self.placeholder = placeholder
+        
         self.insert("1.0", self.placeholder)
         self["fg"] = self.placeholder_color
 
@@ -31,7 +35,7 @@ class TextWithPlaceholder(Text):
         """Put placeholder text in the text field if user clicks out of the text field and hasn"t typed in it"""
         string = self.get("1.0", "end").strip()
         if string == "":
-            self._put_placeholder()
+            self.put_placeholder(self.placeholder)
             
 class HoverButton(Button):
     """

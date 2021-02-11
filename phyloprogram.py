@@ -1,7 +1,6 @@
 """Main application. Defines the classes and methods of the application gui."""
 
 import tkinter as tk
-import tkinter.simpledialog
 import tkinter.filedialog
 import tkinter.messagebox
 from tkinter import (Tk, Canvas, Scrollbar, Menu, Toplevel,
@@ -16,6 +15,7 @@ from dialogs import (MultiChoicePrompt, StringInputPrompt)
 from widgets import ToolTip
 import platform
 import webbrowser
+import drspr as d
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -26,6 +26,7 @@ def resource_path(relative_path):
         base_path = os.environ.get("_MEIPASS2",os.path.abspath("."))
 
     return os.path.join(base_path, relative_path)
+
 
 class Program(Tk):
     """
@@ -66,14 +67,16 @@ class Program(Tk):
         self._initialise_main_text_widget()
         
         #prompt windows
-        self.enter_network_prompt = None
+        self.input_prompt = None
         self.select_leaves_prompt = None
+    
     
     def _initialise_main_text_widget(self):
         self.main_text_widget = Text(self.main_frame, width=25)
         scroll = Scrollbar(self.main_text_widget, command=self.main_text_widget.yview)
         self.main_text_widget['yscrollcommand'] = scroll.set
         scroll.pack(side="right", fill="y")
+    
     
     @property
     def trees_window(self):
@@ -122,12 +125,19 @@ class Program(Tk):
         
     def _initialise_menu_bar(self):
         """For private use. Initialise the top menu bar and bind shortcuts"""
-        self.menu_bar = Menu(self)
+        menu_bar = Menu(self)
         
-        self.file_menu = Menu(self.menu_bar, tearoff=0)
+        self.file_menu = Menu(menu_bar, tearoff=0)
         
         self.file_menu.add_command(label="Enter network", command=self.new_network, accelerator="Ctrl+N")
         self.file_menu.add_command(label="Open network...", command=self.open_network, accelerator="Ctrl+O")
+        
+        self.file_menu.add_separator()
+        
+        self.file_menu.add_command(label="Enter trees", command=self.new_trees)
+        self.file_menu.add_command(label="Open trees...", command=self.open_trees)
+        
+        self.file_menu.add_separator()
         
         self.save_sub_menu = Menu(self.file_menu, tearoff=0)
         self.save_sub_menu.add_command(label="Text file", command=self.save_text, accelerator="Ctrl+Shift+T")
@@ -138,15 +148,15 @@ class Program(Tk):
         
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Exit", command=self._exit)
-        self.menu_bar.add_cascade(label="File", menu=self.file_menu)
+        menu_bar.add_cascade(label="File", menu=self.file_menu)
         
-        self.help_menu = Menu(self.menu_bar, tearoff=0)
-        self.help_menu.add_command(label="About", command=self.about)
-        self.help_menu.add_command(label="Manual", command=self.manual)
-        self.help_menu.add_command(label="More info", command=self.open_github)
-        self.menu_bar.add_cascade(label="Help", menu=self.help_menu)
+        help_menu = Menu(menu_bar, tearoff=0)
+        help_menu.add_command(label="About", command=self.about)
+        help_menu.add_command(label="Manual", command=self.manual)
+        help_menu.add_command(label="More info", command=self.open_github)
+        menu_bar.add_cascade(label="Help", menu=help_menu)
         
-        self.config(menu=self.menu_bar)
+        self.config(menu=menu_bar)
         
         self.bind_all("<Control-n>", self.new_network)
         self.bind_all("<Control-o>", self.open_network)
@@ -172,6 +182,8 @@ class Program(Tk):
                                               variable=self.graphics_enabled, command=self.set_graphics)
         graphics_check_box.pack(side="right", padx=(0,10))
         ToolTip(graphics_check_box, "Enable graph visualisation for the next entered network")
+        
+    
         
     def set_graphics(self, *_):
         """Set if the program draws the network and trees."""
@@ -241,19 +253,69 @@ class Program(Tk):
         
     def new_network(self, *_):
         """Displays dialog and gets network in extended newick format inputted by the user."""
-        if self.enter_network_prompt:
-            self.enter_network_prompt.update()
-            self.enter_network_prompt.deiconify()
+        if self.input_prompt:
+            self.input_prompt.change_contents("Enter network", "Enter network in extended newick format", "e.g. ((a,(b)#H1), (#H1,c));")
+            self.input_prompt.update()
+            self.input_prompt.deiconify()
         else:
-            self.enter_network_prompt = StringInputPrompt(self, "Enter network", "Enter network in extended newick format")
+            self.input_prompt = StringInputPrompt(self, "Enter network", "Enter network in extended newick format", "e.g. ((a,(b)#H1), (#H1,c));")
+    
+        print(sys.getrefcount(self.input_prompt))
+    
+    def new_trees(self):
+        """Displays dialog and gets at least 2 trees in newick format inputted by the user"""
+        if self.input_prompt:
+            self.input_prompt.change_contents("Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);")
+            self.input_prompt.update()
+            self.input_prompt.deiconify()
+        else:
+            self.input_prompt = StringInputPrompt(self, "Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);", False)
+        
+        print(sys.getrefcount(self.input_prompt))
+    
+    def open_trees(self):
+        pass
+            
+    def get_drspr(self, input_trees):
+        input_trees = input_trees.translate(str.maketrans('', '', ' \n\t\r'))
+        trees_array = input_trees.split(";")
+        
+        if not trees_array[-1]:
+            trees_array.pop()
+        
+        for i, tree in enumerate(trees_array, start=1):
+            print(f"t{i}:\n{tree}\n")
+        
+        
+        (distances, clusters) = d.calculate_drspr(trees_array)
+        
+        length = len(distances)
 
+        if length == 1:
+            print(f"drSPR = {distances[0]}")
+            print(f"Clusters: {clusters[0]}")
+            
+        else:
+        
+            #Printing matrix
+            for i in range(length):
+                print(", ".join(distances[i]))
+                
+            print()
+                
+            for i in range(length-1):
+                print(f"Clusters compared with t{i+1}:")
+                for j in range(i+1, len(clusters[i])):
+                    print(f"t{j+1} (drSPR = {distances[i][j]}): {' '.join(clusters[i][j])}")
+                    
+                print()
+        
             
     def open_network(self, *_):
         """Displays open file prompt and processes a text file that contains the network in extended newick format."""
         filename =  tkinter.filedialog.askopenfilename(initialdir = self.directory, title = "Open text file",
                                                        filetypes = (("text files","*.txt"),("all files","*.*")))
-#         if self.directory == "":
-#             #Set the directory to directory of file that was just opened
+
         path = os.path.split(filename)
         self.directory = path[0]
         text_file = path[1]
@@ -468,6 +530,7 @@ class TreesWindow(Window):
         self.scroll_setup()
         self._initialise_info_bar()
         self.display_figures()
+        
         
     def display_figures(self):
         """Display the figures from the Trees object."""
