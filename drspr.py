@@ -59,20 +59,16 @@ def rspr(tree1, tree2):
     t1 = output_list[0].split()[1].strip()
     t2 = output_list[1].split()[1].strip()
     
-    if t1 == "p":
-        return ("X", "")
-    elif t2 == "p":
-        return ("X", "")
-    else:
-        forest = output_list[length - 3]
-        distance = output_list[-1].split()
-        distance = distance[-1]
-        equals_index = distance.index("=")
-        distance = distance[equals_index+1:]
-        
-        clusters = forest.split()[2:]
-        
-        return (distance, clusters)
+
+    forest = output_list[length - 3]
+    distance = output_list[-1].split()
+    distance = distance[-1]
+    equals_index = distance.index("=")
+    distance = distance[equals_index+1:]
+    
+    clusters = forest.split()[2:]
+    
+    return (distance, clusters)
 
 
 def rspr_pairwise(trees):

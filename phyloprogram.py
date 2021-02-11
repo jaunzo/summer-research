@@ -271,44 +271,82 @@ class Program(Tk):
         else:
             self.input_prompt = StringInputPrompt(self, "Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);", False)
         
-        print(sys.getrefcount(self.input_prompt))
+        #print(sys.getrefcount(self.input_prompt))
     
     def open_trees(self):
-        pass
+        """Opens file that contains at least 2 trees in newick format"""
+        filename =  tkinter.filedialog.askopenfilename(initialdir = self.directory, title = "Open text file",
+                                                       filetypes = (("text files","*.txt"),("all files","*.*")))
+
+        path = os.path.split(filename)
+        self.directory = path[0]
+        text_file = path[1]
+            
+        if filename != "":
+            f = open(filename, "r")
+            text = f.read().strip()
+            
+            if text != None:
+                try:
+                    self.get_drspr(text)
+                except MalformedNewickException:
+                    error_message = "Could not read trees.\n\Trees must contain at least one labelled leaf and trees must terminate with semicolon."
+                    tkinter.messagebox.showerror(title="Open network error", message=error_message)
+                    
             
     def get_drspr(self, input_trees):
+        """Get the rspr distance"""
         input_trees = input_trees.translate(str.maketrans('', '', ' \n\t\r'))
         trees_array = input_trees.split(";")
         
         if not trees_array[-1]:
             trees_array.pop()
         
-        for i, tree in enumerate(trees_array, start=1):
-            print(f"t{i}:\n{tree}\n")
-        
-        
         (distances, clusters) = d.calculate_drspr(trees_array)
+        
+        self.net_canvas.get_tk_widget().pack_forget()
+        self.main_text_widget.pack(expand=True, fill="both")
+        self.print_drspr(trees_array, distances, clusters)
+        
+        if self.graphics:
+            self._enable_save()
+            #Implement tree visualisation here
+        else:
+            self._enable_text_save()
+        
+                
+    def print_drspr(self, trees_array, distances, clusters):
+        """Output rspr distance information in the main window"""
+        self.main_text_widget.config(state="normal")
+        self.main_text_widget.delete('1.0', "end")
+        
+        
+        self.main_text_widget.insert("end", "TREES:\n")
+        for i, tree in enumerate(trees_array, start=1):
+            self.main_text_widget.insert("end", f"t{i}:\n{tree};\n\n")
         
         length = len(distances)
 
         if length == 1:
-            print(f"drSPR = {distances[0]}")
-            print(f"Clusters: {clusters[0]}")
+            self.main_text_widget.insert("end", f"\ndrSPR = {distances[0]}\n")
+            self.main_text_widget.insert("end", f"Clusters: {clusters[0]}\n")
             
         else:
         
             #Printing matrix
+            self.main_text_widget.insert("end", "\nDISTANCE MATRIX:\n")
             for i in range(length):
-                print(", ".join(distances[i]))
-                
-            print()
-                
+                self.main_text_widget.insert("end", f"{', '.join(distances[i])}\n")
+               
+            #Printing cluster
+            self.main_text_widget.insert("end", "\n\nCLUSTERS:")
             for i in range(length-1):
-                print(f"Clusters compared with t{i+1}:")
+                self.main_text_widget.insert("end", f"\nClusters compared with t{i+1}:\n")
                 for j in range(i+1, len(clusters[i])):
-                    print(f"t{j+1} (drSPR = {distances[i][j]}): {' '.join(clusters[i][j])}")
-                    
-                print()
+                    self.main_text_widget.insert("end",
+                        f"t{j+1} (drSPR = {distances[i][j]}): {' '.join(clusters[i][j])}\n")
+        
+        self.main_text_widget.config(state="disabled")
         
             
     def open_network(self, *_):
