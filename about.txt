@@ -1,10 +1,14 @@
-Version 1.0.0
+Version 2.0
 
 This program takes a small binary phylogenetic network in extended newick format
-and generates trees displayed by the network. It can open text files containing 
-the network in newick format and export the generated network as text or image 
-files.
+and generates trees displayed by the network. It can also calculate drSPR when 
+given at least 2 trees. When more than 2 trees are inputted, all trees are 
+compared pairwise. It can open text files containing the network in newick format 
+and export the generated network as text or image files.
 
 Graphviz must be installed to enable graph visualisation.
+
+Release notes v2.0:
+- Added drSPR functionality
 
 Python 3.8.6
