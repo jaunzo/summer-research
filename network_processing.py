@@ -23,8 +23,6 @@ from phylonetwork import PhylogeneticNetwork
 import matplotlib.pyplot as plt
 import copy
 import dendropy
-import warnings
-import matplotlib.cbook
 
 from cached_property import cached_property
 
@@ -304,7 +302,7 @@ class EmbeddedTrees:
             new_tree = PhylogeneticNetwork(eNewick=new_string)
             tree_newick = new_tree.eNewick()
             
-            warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
+            #warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
             
             #Check if tree is unique
             if tree_newick in unique_tree_newicks:

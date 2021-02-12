@@ -197,6 +197,10 @@ class Program(Tk):
         self.select_leaves_button.config(state = "normal")
         self.display_trees_button.config(state = "normal")
     
+    def _enable_tree_display(self):
+        """For private use. Only enables show trees button when user displays drSPR trees"""
+        self.display_trees_button.config(state = "normal")
+    
     def _enable_save(self):
         """For private use. Save functions are enabled when a network and trees has successfully been processed and displayed."""
         self.file_menu.entryconfigure("Save as...", state = "normal")
@@ -302,15 +306,16 @@ class Program(Tk):
         if not trees_array[-1]:
             trees_array.pop()
         
-        (distances, clusters) = d.calculate_drspr(trees_array)
+        (distances, clusters, self.trees) = d.calculate_drspr(trees_array)
         
         self.net_canvas.get_tk_widget().pack_forget()
         self.main_text_widget.pack(expand=True, fill="both")
-        self.print_drspr(trees_array, distances, clusters)
+        self.print_drspr(self.trees.trees, distances, clusters)
         
         if self.graphics:
             self._enable_save()
             #Implement tree visualisation here
+            self.display_trees(embedded_trees=False)
         else:
             self._enable_text_save()
         
@@ -442,7 +447,7 @@ class Program(Tk):
         
         self._enable_text_save()
     
-    def display_trees(self):
+    def display_trees(self, **kwargs):
         """
         Displays trees in a window when user clicks "Show trees" or selects leaves. Only one trees window is
         displayed at a time
@@ -454,9 +459,10 @@ class Program(Tk):
             self._trees_window.replace_trees(self.trees)
         else:
             #Create window
-            self._trees_window = TreesWindow(self, self.trees, width=self.scaled_width, height=self.scaled_height, title="Trees")            
+            self._trees_window = TreesWindow(self, self.trees, width=self.scaled_width, height=self.scaled_height, title="Trees", **kwargs)            
         
         self._enable_save()
+        print(sys.getrefcount(self._trees_window))
     
     def save_text(self, *_):
         """Saves network and trees in newick format as a text file in the directory that the user specifies."""
@@ -558,20 +564,23 @@ class Window(Toplevel):
         
 class TreesWindow(Window):
     """Class for window that displays visualisation of trees."""
-    def __init__(self, main_window, trees_obj, **kwargs):
+    def __init__(self, main_window, trees_obj, embedded_trees=True, **kwargs):
         super().__init__(**kwargs)
         self.main = main_window
         self.tree_figures = trees_obj.figures
-        self.canvases = []
+        #self.canvases = []
         self.protocol("WM_DELETE_WINDOW", self._exit)
+        self.embedded = embedded_trees
         
         self.scroll_setup()
-        self._initialise_info_bar()
+        if self.embedded:
+            self._initialise_info_bar()
         self.display_figures()
         
         
     def display_figures(self):
         """Display the figures from the Trees object."""
+        self.canvases = []
         for fig in self.tree_figures:
             trees_canvas = FigureCanvasTkAgg(fig, master=self.frame)
             trees_canvas.get_tk_widget().pack(side="top", fill="both", expand=1)
@@ -581,7 +590,8 @@ class TreesWindow(Window):
         plt.close("all") #Close all figures
         
         #Update number of unique trees
-        self._update_info_bar()
+        if self.embedded:
+            self._update_info_bar()
         
         
     def _update_info_bar(self):
@@ -608,22 +618,20 @@ class TreesWindow(Window):
         for canvas in self.canvases:
             canvas.get_tk_widget().destroy()
             
-        for widget in self.frame.winfo_children():
-            widget.destroy()
+#         for widget in self.frame.winfo_children():
+#             widget.destroy()
             
             
     def replace_trees(self, new_trees_obj):
         """Replace the trees currently displayed."""
-        self.trees_obj = new_trees_obj
-        self.tree_figures = self.trees_obj.figures
-        self.canvases = []
         self.clear_figures()
+        self.tree_figures = new_trees_obj.figures
         self.display_figures()
         
         
     def _exit(self):
         """Hide window"""
-        self.main.trees_window = None
+        #self.main.trees_window = None
         self.withdraw()
         
 
