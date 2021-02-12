@@ -72,6 +72,7 @@ class Program(Tk):
     
     
     def _initialise_main_text_widget(self):
+        
         self.main_text_widget = Text(self.main_frame, width=25)
         scroll = Scrollbar(self.main_text_widget, command=self.main_text_widget.yview)
         self.main_text_widget['yscrollcommand'] = scroll.set
@@ -300,6 +301,7 @@ class Program(Tk):
             
     def get_drspr(self, input_trees):
         """Get the rspr distance"""
+        self.network = None
         input_trees = input_trees.translate(str.maketrans('', '', ' \n\t\r'))
         trees_array = input_trees.split(";")
         
@@ -315,7 +317,8 @@ class Program(Tk):
         if self.graphics:
             self._enable_save()
             #Implement tree visualisation here
-            self.display_trees(embedded_trees=False)
+            self._enable_tree_display()
+            
         else:
             self._enable_text_save()
         
@@ -429,12 +432,17 @@ class Program(Tk):
     def generate_trees(self):
         """Generate the tree objects and display them depending on graphics mode."""
         #Get Trees object
-        self.trees = self.network.process()
+        if self.network:
+            self.trees = self.network.process()
         
-        if self.network.graphics:
-            self.display_trees()
+            if self.network.graphics:
+                self.display_trees()
+            else:
+                self.print_trees()
+                
         else:
-            self.print_trees()
+            if self.graphics:
+                self.display_trees(embedded_trees=False)
         
         
     def print_trees(self):
@@ -490,12 +498,13 @@ class Program(Tk):
         if directory is None: #if dialog closed with "cancel".
             return
         
-        self.net_fig.savefig(export_path + "/network.png", bbox_inches="tight")
+        if self.network:
+            self.net_fig.savefig(export_path + "/network.png", bbox_inches="tight")
         
         #Export trees
         count = 1
         for tree_fig in self.trees.figures:
-            tree_fig.savefig(f"{abs_path}{directory}/trees{str(count)}.png", bbox_inches="tight")
+            tree_fig.savefig(f"{abs_path}{directory}/t{str(count)}.png", bbox_inches="tight")
             count += 1
         
     def _exit(self):
@@ -567,7 +576,8 @@ class TreesWindow(Window):
     def __init__(self, main_window, trees_obj, embedded_trees=True, **kwargs):
         super().__init__(**kwargs)
         self.main = main_window
-        self.tree_figures = trees_obj.figures
+        self.trees_obj = trees_obj
+        #self.tree_figures = self.trees_obj.figures
         #self.canvases = []
         self.protocol("WM_DELETE_WINDOW", self._exit)
         self.embedded = embedded_trees
@@ -581,7 +591,7 @@ class TreesWindow(Window):
     def display_figures(self):
         """Display the figures from the Trees object."""
         self.canvases = []
-        for fig in self.tree_figures:
+        for fig in self.trees_obj.figures:
             trees_canvas = FigureCanvasTkAgg(fig, master=self.frame)
             trees_canvas.get_tk_widget().pack(side="top", fill="both", expand=1)
             self.canvases.append(trees_canvas)
@@ -613,20 +623,22 @@ class TreesWindow(Window):
         self.info_label = Label(info_frame, text=info_text)
         self.info_label.pack(anchor="c")
             
+            
     def clear_figures(self):
         """Remove the figures currently displayed in the TreesWindow."""
         for canvas in self.canvases:
             canvas.get_tk_widget().destroy()
             
-#         for widget in self.frame.winfo_children():
-#             widget.destroy()
+        for widget in self.frame.winfo_children():
+            widget.destroy()
             
             
     def replace_trees(self, new_trees_obj):
         """Replace the trees currently displayed."""
-        self.clear_figures()
-        self.tree_figures = new_trees_obj.figures
-        self.display_figures()
+        if self.trees_obj != new_trees_obj:
+            self.clear_figures()
+            self.trees_obj = new_trees_obj
+            self.display_figures()
         
         
     def _exit(self):
