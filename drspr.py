@@ -49,7 +49,7 @@ def rspr(tree1, tree2):
     output_list = out.split("\n")
     
     if err:
-        print("test")
+        print("Error occured in rspr")
         
     executable.wait()
     executable.kill()
@@ -166,10 +166,11 @@ class Trees:
                 #Add new figure
                 self.figures.append(figure)
                 
-            tree_ax = figure.add_subplot(rows, cols, plot_number + 1)
-            tree_ax.title.set_text(f"t{i+1}")
-            
-            np.create_graph(tree, figure.gca())
+            if tree:
+                tree_ax = figure.add_subplot(rows, cols, plot_number + 1)
+                tree_ax.title.set_text(f"t{i+1}")
+                
+                np.create_graph(tree, figure.gca())
         
         return self.figures
                 
