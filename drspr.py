@@ -85,9 +85,19 @@ def rspr_pairwise(trees):
                 t1 = Tree(trees[i] + ";", f"t{i+1}")
                 t2 = Tree(trees[j] + ";", f"t{j+1}")
                 trees_array[i] = t1
-                (distance, clusters) = rspr(t1.eNewick(), t2.eNewick())
-                distance_array[i][j] = distance
-                clusters_array[i][j] = clusters
+                
+                #Check if leaf set the same
+                t1_leaves = t1.leaves 
+                t2_leaves = t2.leaves
+                if t1_leaves == t2_leaves:
+                    (distance, clusters) = rspr(t1.eNewick(), t2.eNewick())
+                    distance_array[i][j] = distance
+                    clusters_array[i][j] = clusters
+                    
+                else:
+                    missing_leaves = (t1_leaves.difference(t2_leaves)).union(t2_leaves.difference(t1_leaves))
+                    distance_array[i][j] = "X"
+                    clusters_array[i][j] = [f"Error occured. Trees don't have same taxa set.  Missing taxa: {', '.join(missing_leaves)}"]
                 
             except MalformedNewickException:
                 distance_array[i][j] = "X"
@@ -99,6 +109,14 @@ def rspr_pairwise(trees):
 def calculate_drspr(trees_array):
     """
     Calculates drSPR. If more than 2 trees are given, distances are calculated pairwise
+    Parameter:
+    trees_array: array of trees in newick string
+    
+    Returns:
+    distances: array of distances
+    clusters: array of clusters
+    trees_obj: Trees object
+    
     """
     length = len(trees_array)
     
@@ -110,20 +128,28 @@ def calculate_drspr(trees_array):
             try:
                 trees_array[i] = Tree(trees_array[i] + ";", f"t{i+1}")
                 
+                
+                
             except MalformedNewickException as e:
                 trees_array[i] = None
                 distances = ["X"]
                 clusters = [f"Error occured. Check newick string of t{i+1}"]
                 return (distances, clusters, Trees(trees_array))
-            
-        (distances, clusters) = rspr(trees_array[0].eNewick(), trees_array[1].eNewick())
+        
+        t1_leaves = trees_array[0].leaves
+        t2_leaves = trees_array[1].leaves
+        if t1_leaves == t2_leaves:
+            (distances, clusters) = rspr(trees_array[0].eNewick(), trees_array[1].eNewick())
+        else:
+            missing_leaves = (t1_leaves.difference(t2_leaves)).union(t2_leaves.difference(t1_leaves))
+            return ("X", f"Error occured. Trees don't have same taxa set. Missing taxa: {', '.join(missing_leaves)}", trees_array)
             
     else:
         (distances, clusters, trees_array) = rspr_pairwise(trees_array)
         
+    trees_obj = Trees(trees_array)
     
-        
-    return (distances, clusters, Trees(trees_array))
+    return (distances, clusters, trees_obj)
 
 
     
@@ -132,6 +158,18 @@ class Tree(PhylogeneticNetwork):
     def __init__(self, tree, number):
         super().__init__(tree)
         self.id = number
+        
+    @property
+    def leaves(self):
+        leaves = super().leaves
+        labelled_leaves = set()
+        
+        labels_dict = self.labeling_dict
+        
+        for leaf in leaves:
+            labelled_leaves.add(labels_dict[leaf])
+            
+        return labelled_leaves
 
 
 
@@ -145,12 +183,6 @@ class Trees:
         rows = 1
         cols = 2
         
-#         for i, tree in enumerate(self.trees):
-#             if i % num_rows * num_cols == 0:
-#                 figure = plt.figure("Trees")
-#                 
-#             np.create_graph(tree, figure.gca())
-            
         for i, tree in enumerate(self.trees):
             #Draw the output trees
             #Display rows * cols trees per figure
@@ -158,7 +190,7 @@ class Trees:
             if plot_number == 0:
                 
                 #Close open figures
-                plt.close("all")
+                #plt.close("all")
                 
                 #Create new figure
                 figure = plt.figure()
@@ -166,26 +198,29 @@ class Trees:
                 #Add new figure
                 self.figures.append(figure)
                 
+                
             if tree:
                 tree_ax = figure.add_subplot(rows, cols, plot_number + 1)
                 tree_ax.title.set_text(f"t{i+1}")
                 
                 np.create_graph(tree, figure.gca())
+                
+        plt.show()
         
         return self.figures
                 
     
 if __name__ == "__main__":
     trees = []
-#     trees.append("(((((((1,9),2),((13,3),8)),12),15),(((((14,6),4),7),11),10)),5);")
-#     trees.append("((((((((((14,6),4),7),11),(1,9)),2),((13,3),8)),15),(10,12)),5);")
-#     trees.append("(((((((14,6),4),7),11),(10,12)),((((1,9),2),((13,3),8)),15)),5);")
-#     trees.append("((((((((((14,6),4),7),11),((1,5),9)),2),((13,3),8)),12),15),10);")
-#     trees.append("(((((((1,5),9),2),((13,3),8)),12),15),(((((14,6),4),7),11),10));")
-    trees.append("(((1,2),3),4);")
-    trees.append("(((1,4),2),3);")
+    trees.append("(((((((1,9),2),((13,3),8)),12),15),(((((14,6),4),7),11),10)),5)")
+    trees.append("((((((((((14,6),4),7),11),(1,9)),2),((13,3),8)),15),(10,12)),5)")
+    trees.append("(((((((14,6),4),7),11),(10,12)),((((1,9),2),((13,3),8)),15)),5)")
+    trees.append("((((((((((14,6),4),7),11),((1,5),9)),2),((13,3),8)),12),15),10)")
+    trees.append("(((((((1,5),9),2),((13,3),8)),12),15),(((((14,6),4),7),11),10))")
+#     trees.append("(((1,2),3),4)")
+#     trees.append("(((1,4),2),3)")
     
-    (distances, clusters, trees_array) = calculate_drspr(trees)
+    (distances, clusters, trees_obj) = calculate_drspr(trees)
     
     
     length = len(distances)
@@ -209,8 +244,7 @@ if __name__ == "__main__":
                 
             print()
             
-    print(trees_array)
-    #Trees(trees_array).draw()
+    figures = trees_obj.draw()
     
     
     

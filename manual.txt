@@ -1,4 +1,4 @@
-User Manual (Version 1.0)
+User Manual (Version 2.0)
 
 ------------------------------------------------------------------------------
 File Menu:
@@ -14,6 +14,18 @@ File -> Open network... (Ctrl+O):
 Opens a text file which contains a network in extended Newick format. Network 
 string must contain at least one labelled leaf and must end with semicolon.
 Text file must only contain ONE network.
+
+
+File -> Enter trees (Ctrl+T):
+-----------------------------
+Enter in at least 2 trees in newick format to calculate drSPR. Each tree must 
+terminate with a semicolon.
+
+
+File -> Open trees... (Ctrl+Shift+O):
+-------------------------------------
+Opens a text file which contains at least 2 trees in newick format to calculate
+drSPR. Each tree must terminate with a semicolon.
 
 
 File -> Save as... -> Text file (Ctrl+Shift+T):
@@ -38,8 +50,11 @@ of leaves.
 Show trees:
 -----------
 Opens a window that shows all unique trees with the number of occurences 
-displayed above each tree. By default, trees are displayed with all labelled 
-leaves.
+displayed above each tree when generating all embedded trees from a network. 
+By default, trees are displayed with all labelled leaves.
+
+When calculating drSPR, this opens a window that visualises all entered valid 
+trees with tree number displayed above each tree.
 
 
 Enable graphics:

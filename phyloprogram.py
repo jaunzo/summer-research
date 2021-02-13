@@ -53,6 +53,10 @@ class Program(Tk):
         self.geometry(f"{self.scaled_width}x{self.scaled_height}")
         self.protocol("WM_DELETE_WINDOW", self._exit)
         
+        #prompt windows
+        self.input_prompt = None
+        self.select_leaves_prompt = None
+        
         self._initialise_menu_bar()
         self._initialise_tool_bar()
         self._initialise_info_bar()
@@ -66,9 +70,7 @@ class Program(Tk):
         
         self._initialise_main_text_widget()
         
-        #prompt windows
-        self.input_prompt = None
-        self.select_leaves_prompt = None
+        
     
     
     def _initialise_main_text_widget(self):
@@ -134,8 +136,8 @@ class Program(Tk):
         
         self.file_menu.add_separator()
         
-        self.file_menu.add_command(label="Enter trees", command=self.new_trees)
-        self.file_menu.add_command(label="Open trees...", command=self.open_trees)
+        self.file_menu.add_command(label="Enter trees", command=self.new_trees, accelerator="Ctrl+T")
+        self.file_menu.add_command(label="Open trees...", command=self.open_trees, accelerator="Ctrl+Shift+O")
         
         self.file_menu.add_separator()
         
@@ -160,8 +162,11 @@ class Program(Tk):
         
         self.bind_all("<Control-n>", self.new_network)
         self.bind_all("<Control-o>", self.open_network)
+        self.bind_all("<Control-t>", self.new_trees)
+        self.bind_all("<Control-O>", self.open_trees)
         self.bind_all("<Control-T>", self.save_text)
         self.bind_all("<Control-I>", self.save_image)
+        
         
     def _initialise_tool_bar(self):
         """For private use. Initialise the tool bar"""
@@ -196,9 +201,9 @@ class Program(Tk):
         """For private use. Buttons involving trees are enabled when a network has successfully been processed and displayed."""
         self.select_leaves_button.config(state = "normal")
         self.display_trees_button.config(state = "normal")
-    
+        
     def _enable_tree_display(self):
-        """For private use. Only enables show trees button when user displays drSPR trees"""
+        """For private use. Show trees button enabled when graphics enabled and calculating drSPR"""
         self.display_trees_button.config(state = "normal")
     
     def _enable_save(self):
@@ -266,7 +271,7 @@ class Program(Tk):
     
         print(sys.getrefcount(self.input_prompt))
     
-    def new_trees(self):
+    def new_trees(self, *_):
         """Displays dialog and gets at least 2 trees in newick format inputted by the user"""
         if self.input_prompt:
             self.input_prompt.change_contents("Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);")
@@ -277,9 +282,9 @@ class Program(Tk):
         
         #print(sys.getrefcount(self.input_prompt))
     
-    def open_trees(self):
+    def open_trees(self, *_):
         """Opens file that contains at least 2 trees in newick format"""
-        filename =  tkinter.filedialog.askopenfilename(initialdir = self.directory, title = "Open text file",
+        filename =  tkinter.filedialog.askopenfilename(initialdir = self.directory, title = "Open trees...",
                                                        filetypes = (("text files","*.txt"),("all files","*.*")))
 
         path = os.path.split(filename)
@@ -314,8 +319,7 @@ class Program(Tk):
         
         if self.graphics:
             self._enable_save()
-            #Implement tree visualisation here
-            self.display_trees(embedded_trees=False)
+            
         else:
             self._enable_text_save()
         
@@ -328,7 +332,7 @@ class Program(Tk):
         
         self.main_text_widget.insert("end", "TREES:\n")
         for i, tree in enumerate(trees_array, start=1):
-            self.main_text_widget.insert("end", f"t{i}:\n{tree};\n\n")
+            self.main_text_widget.insert("end", f"t{i}:\n{tree}\n\n")
         
         length = len(distances)
 
@@ -356,7 +360,7 @@ class Program(Tk):
             
     def open_network(self, *_):
         """Displays open file prompt and processes a text file that contains the network in extended newick format."""
-        filename =  tkinter.filedialog.askopenfilename(initialdir = self.directory, title = "Open text file",
+        filename =  tkinter.filedialog.askopenfilename(initialdir = self.directory, title = "Open network...",
                                                        filetypes = (("text files","*.txt"),("all files","*.*")))
 
         path = os.path.split(filename)
@@ -429,12 +433,16 @@ class Program(Tk):
     def generate_trees(self):
         """Generate the tree objects and display them depending on graphics mode."""
         #Get Trees object
-        self.trees = self.network.process()
-        
-        if self.network.graphics:
-            self.display_trees()
-        else:
-            self.print_trees()
+        if self.network:
+            self.trees = self.network.process()
+            
+            if self.network.graphics:
+                self.display_trees()
+            else:
+                self.print_trees()
+                
+        elif self.graphics:
+            self.display_trees(embedded_trees=False)
         
         
     def print_trees(self):
