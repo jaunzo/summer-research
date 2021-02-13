@@ -26,10 +26,12 @@ along with rspr.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import platform
+import subprocess
 from subprocess import PIPE, Popen
 from phylonetwork import MalformedNewickException, PhylogeneticNetwork
 import network_processing as np
 import matplotlib.pyplot as plt
+import phyloprogram
 
 def rspr(tree1, tree2):
     """
@@ -42,18 +44,28 @@ def rspr(tree1, tree2):
         executable = Popen(executable="rspr.exe", args="", stdin=PIPE,
                                stdout=PIPE, stderr=PIPE,
                                universal_newlines=True, shell=True)
-
-    out, err = executable.communicate(input=input_string)
+        
+        out, err = executable.communicate(input=input_string) 
+        
+        executable.wait()
+        executable.kill()
+        
+    else:
+        path = phyloprogram.resource_path("rspr")
+        executable = subprocess.run(path, stdout=PIPE, stderr=PIPE,
+                                    input=input_string.encode("utf-8"),
+                                    shell=True)
+        
+        out = executable.stdout.decode("utf-8")
+        err = executable.stderr.decode("utf-8")
     
     out = out.strip()
     output_list = out.split("\n")
     
     if err:
+        print(err)
         print("Error occured in rspr")
         
-    executable.wait()
-    executable.kill()
-    
     
     length = len(output_list)
 
@@ -126,8 +138,7 @@ def calculate_drspr(trees_array):
     elif length == 2:
         for i in range(len(trees_array)):
             try:
-                trees_array[i] = Tree(trees_array[i] + ";", f"t{i+1}")
-                
+                trees_array[i] = Tree(trees_array[i] + ";", f"t{i+1}") 
                 
                 
             except MalformedNewickException as e:
@@ -167,7 +178,8 @@ class Tree(PhylogeneticNetwork):
         labels_dict = self.labeling_dict
         
         for leaf in leaves:
-            labelled_leaves.add(labels_dict[leaf])
+            if leaf in labels_dict:
+                labelled_leaves.add(labels_dict[leaf])
             
         return labelled_leaves
 
@@ -190,7 +202,7 @@ class Trees:
             if plot_number == 0:
                 
                 #Close open figures
-                #plt.close("all")
+                plt.close("all")
                 
                 #Create new figure
                 figure = plt.figure()
@@ -205,7 +217,7 @@ class Trees:
                 
                 np.create_graph(tree, figure.gca())
                 
-        plt.show()
+        #plt.show()
         
         return self.figures
                 
@@ -244,7 +256,7 @@ if __name__ == "__main__":
                 
             print()
             
-    figures = trees_obj.draw()
+    #figures = trees_obj.draw()
     
     
     
