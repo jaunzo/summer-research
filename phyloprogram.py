@@ -16,16 +16,17 @@ from widgets import ToolTip
 import platform
 import webbrowser
 import drspr as d
+import path
 
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.environ.get("_MEIPASS2",os.path.abspath("."))
-
-    return os.path.join(base_path, relative_path)
+# def resource_path(relative_path):
+#     """ Get absolute path to resource, works for dev and for PyInstaller """
+#     try:
+#         # PyInstaller creates a temp folder and stores path in _MEIPASS
+#         base_path = sys._MEIPASS
+#     except Exception:
+#         base_path = os.environ.get("_MEIPASS2",os.path.abspath("."))
+# 
+#     return os.path.join(base_path, relative_path)
 
 
 class Program(Tk):
@@ -233,7 +234,7 @@ class Program(Tk):
     def about(self):
         """Display overview of program on window"""
         self.about_window = Window(title="About")
-        path = resource_path("about.txt")
+        path = path.resource_path("about.txt")
         f = open(path, "r")
         about_text = f.read()
         text_widget = Text(self.about_window)
@@ -245,7 +246,7 @@ class Program(Tk):
         """Display program manual on window"""
         self.manual_window = Window(title="Manual", width=self.scaled_width,
                                     height=self.scaled_height//2)
-        path = resource_path("manual.txt")
+        path = path.resource_path("manual.txt")
         f = open(path, "r")
         manual_text = f.read()
         text_widget = Text(self.manual_window, width=30)
@@ -305,6 +306,7 @@ class Program(Tk):
             
     def get_drspr(self, input_trees):
         """Get the rspr distance"""
+        self.network = None
         input_trees = input_trees.translate(str.maketrans('', '', ' \n\t\r'))
         trees_array = input_trees.split(";")
         
@@ -319,6 +321,7 @@ class Program(Tk):
         
         if self.graphics:
             self._enable_save()
+            self._enable_tree_display()
             
         else:
             self._enable_text_save()

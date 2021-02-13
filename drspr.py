@@ -31,7 +31,7 @@ from subprocess import PIPE, Popen
 from phylonetwork import MalformedNewickException, PhylogeneticNetwork
 import network_processing as np
 import matplotlib.pyplot as plt
-import phyloprogram
+import path
 
 def rspr(tree1, tree2):
     """
@@ -51,7 +51,7 @@ def rspr(tree1, tree2):
         executable.kill()
         
     else:
-        path = phyloprogram.resource_path("rspr")
+        path = path.resource_path("rspr")
         executable = subprocess.run(path, stdout=PIPE, stderr=PIPE,
                                     input=input_string.encode("utf-8"),
                                     shell=True)
