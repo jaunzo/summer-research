@@ -16,7 +16,6 @@ class MultiChoicePrompt(Toplevel):
         self.text_placeholder = text_placeholder
         self.protocol("WM_DELETE_WINDOW", self._exit)
         
-        
         prompt_frame = Frame(self)
         prompt_frame.pack(side="top")
         prompt_frame.bind("<ButtonRelease-1>", self._text_focus_off)

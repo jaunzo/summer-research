@@ -1,28 +1,8 @@
 """Module that handles the generation of trees displayed by input network"""
 
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
-
-##############################################################################
-##  DendroPy Phylogenetic Computing Library.
-##
-##  Copyright 2010-2015 Jeet Sukumaran and Mark T. Holder.
-##  All rights reserved.
-##
-##  See "LICENSE.rst" for terms and conditions of usage.
-##
-##  If you use this work or any portion thereof in published work,
-##  please cite it as:
-##
-##     Sukumaran, J. and M. T. Holder. 2010. DendroPy: a Python library
-##     for phylogenetic computing. Bioinformatics 26: 1569-1571.
-##
-##############################################################################
-
 from phylonetwork import PhylogeneticNetwork
 import matplotlib.pyplot as plt
 import copy
-import dendropy
 
 from cached_property import cached_property
 
@@ -71,7 +51,7 @@ class Network:
         """Number of labelled leaves in input network"""
         return len(self.labelled_leaves)
         
-    @cached_property
+    @property
     def labelled_leaves(self):
         """Labelled leaves of the input network."""
         #Get all labelled leaves from input network
@@ -85,6 +65,7 @@ class Network:
                 
         labelled_leaves.sort()
         return labelled_leaves
+        
     
     @cached_property
     def text(self):
@@ -226,10 +207,10 @@ class EmbeddedTrees:
         """Figures of the trees."""
         return self.tree_figs
     
-    @cached_property
-    def leaves(self):
-        """Leaves of the trees."""
-        return tuple(self._selected_leaves)
+#     @cached_property
+#     def leaves(self):
+#         """Leaves of the trees."""
+#         return tuple(self._selected_leaves)
     
     @cached_property
     def text(self):
@@ -280,6 +261,20 @@ class EmbeddedTrees:
             tree_ax = tree_axes[tree_newick]
             tree_count = self.trees_data[tree_newick][0]
             tree_ax.title.set_text(tree_count)
+            
+        #plt.show()
+            
+    def leaves_to_remove(self, tree):
+        """Get set of leaves that are not labelled"""
+        leaves = tree.leaves
+        unlabelled_leaves = set()
+        
+        for leaf in leaves:
+            if not tree.is_labeled(leaf):
+                unlabelled_leaves.add(leaf)
+                
+        return unlabelled_leaves
+        
     
     def generate(self):
         """Get and plot all unique trees displayed by the given network with the number of occurence displayed above the plot."""
@@ -288,22 +283,16 @@ class EmbeddedTrees:
         for tree in self.network.all_trees:
             #Reduce tree
             tree.remove_elementary_nodes()
-            tree_string = "[&R] " + tree.eNewick()
-            dendro_tree = dendropy.Tree.get_from_string(tree_string,"newick")
-            dendro_tree.retain_taxa_with_labels(self._selected_leaves)
+
+            unlabelled_leaves = self.leaves_to_remove(tree)
             
-            newick_string = dendro_tree.as_string(schema="newick")
+            for leaf in unlabelled_leaves:
+                tree.remove_node_and_reconnect(leaf)
+                
+            tree.clear_cache()
+            tree.remove_elementary_nodes()
             
-            try:
-                new_string = newick_string[newick_string.index("("):newick_string.index(";") + 1]
-            except ValueError: #If tree only has one node
-                index = newick_string.index(";")
-                new_string = newick_string[index - 1: index + 1]
-            
-            new_tree = PhylogeneticNetwork(eNewick=new_string)
-            tree_newick = new_tree.eNewick()
-            
-            #warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
+            tree_newick = tree.eNewick()
             
             #Check if tree is unique
             if tree_newick in unique_tree_newicks:
@@ -313,5 +302,13 @@ class EmbeddedTrees:
                 self.trees_data[tree_newick] = [1]
                 unique_tree_newicks.add(tree_newick)
 
-            self.trees_data[tree_newick].append(new_tree)
+            self.trees_data[tree_newick].append(tree)
             
+            
+if __name__ == "__main__":
+    net_newick = "(((1, (2) #H2), ((#H2, #H3))#H1), (#H1, ((3)#H3, 4)));"
+    figure = plt.figure("Network")
+    network = Network(net_newick, figure, True)
+    
+    trees = network.process()
+    trees.draw()
