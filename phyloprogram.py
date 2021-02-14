@@ -80,7 +80,7 @@ class Program(Tk):
     
     
     def _initialise_info_bar(self):
-        """For private use. Info bar that displays number of reticulations and labelled leaves in network"""
+        """For private use. Info bar that displays file opened, number of reticulations and labelled leaves in network"""
         self.info_frame = Frame(self)
         self.info_frame.pack(side="bottom", fill="x")
         
@@ -160,7 +160,7 @@ class Program(Tk):
         
         self.display_trees_button = HoverButton(self.toolbar, text ="Show trees", relief="raised",
                                                 command=self.generate_trees, state="disabled",
-                                                tooltip_text="Generate trees with currently selected leaves")
+                                                tooltip_text="Generate trees with currently selected leaves or show trees when calculating drSPR")
         
         self.graphics_enabled = IntVar()
         self.graphics = False
@@ -214,8 +214,8 @@ class Program(Tk):
     def about(self):
         """Display overview of program on window"""
         self.about_window = Window(title="About")
-        path = path.resource_path("about.txt")
-        f = open(path, "r")
+        path_file = path.resource_path("about.txt")
+        f = open(path_file, "r")
         about_text = f.read()
         text_widget = Text(self.about_window)
         text_widget.insert("1.0", about_text)
@@ -226,8 +226,8 @@ class Program(Tk):
         """Display program manual on window"""
         self.manual_window = Window(title="Manual", width=self.scaled_width,
                                     height=self.scaled_height//2)
-        path = path.resource_path("manual.txt")
-        f = open(path, "r")
+        path_file = path.resource_path("manual.txt")
+        f = open(path_file, "r")
         manual_text = f.read()
         text_widget = Text(self.manual_window, width=30)
         text_widget.insert("1.0", manual_text)
@@ -299,8 +299,6 @@ class Program(Tk):
         self.main_text_widget.pack(expand=True, fill="both")
         self.print_drspr(self.trees.trees, distances, clusters)
         
-        print(sys.getrefcount(self.trees_window))
-        
         if self.graphics:
             self._enable_save()
             self._enable_tree_display()
@@ -343,6 +341,8 @@ class Program(Tk):
                         f"t{j+1} (drSPR = {distances[i][j]}): {' '.join(clusters[i][j])}\n")
         
         self.main_text_widget.config(state="disabled")
+        
+        
         
             
     def open_network(self, *_):
