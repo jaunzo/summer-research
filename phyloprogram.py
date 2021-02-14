@@ -9,7 +9,7 @@ from network_processing import Network
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import sys, os
 import matplotlib.pyplot as plt
-from widgets import (HoverButton)
+from widgets import HoverButton
 from phylonetwork import MalformedNewickException
 from dialogs import (MultiChoicePrompt, StringInputPrompt)
 from widgets import ToolTip
@@ -17,16 +17,6 @@ import platform
 import webbrowser
 import drspr as d
 import path
-
-# def resource_path(relative_path):
-#     """ Get absolute path to resource, works for dev and for PyInstaller """
-#     try:
-#         # PyInstaller creates a temp folder and stores path in _MEIPASS
-#         base_path = sys._MEIPASS
-#     except Exception:
-#         base_path = os.environ.get("_MEIPASS2",os.path.abspath("."))
-# 
-#     return os.path.join(base_path, relative_path)
 
 
 class Program(Tk):
@@ -44,7 +34,7 @@ class Program(Tk):
         self.net_frame = None
         self.directory = ""
         self.net_fig = None
-        self._trees_window = None
+        self.trees_window = None
         
         self.title("PhyloProgram")
         
@@ -80,16 +70,6 @@ class Program(Tk):
         self.main_text_widget['yscrollcommand'] = scroll.set
         scroll.pack(side="right", fill="y")
     
-    
-    @property
-    def trees_window(self):
-        """Return instance of TreeWindow object"""
-        return self._trees_window
-    
-    @trees_window.setter
-    def trees_window(self, value):
-        """Set the program's tree window"""
-        self._trees_window = value
         
     def _get_dpi(self):
         """For private use. Get the dpi of the current screen"""
@@ -281,7 +261,7 @@ class Program(Tk):
         else:
             self.input_prompt = StringInputPrompt(self, "Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);", False)
         
-        #print(sys.getrefcount(self.input_prompt))
+        #print(sys.getrefcount(self.trees_window))
     
     def open_trees(self, *_):
         """Opens file that contains at least 2 trees in newick format"""
@@ -319,12 +299,16 @@ class Program(Tk):
         self.main_text_widget.pack(expand=True, fill="both")
         self.print_drspr(self.trees.trees, distances, clusters)
         
+        print(sys.getrefcount(self.trees_window))
+        
         if self.graphics:
             self._enable_save()
             self._enable_tree_display()
             
         else:
             self._enable_text_save()
+            
+            
         
                 
     def print_drspr(self, trees_array, distances, clusters):
@@ -402,9 +386,9 @@ class Program(Tk):
             
     def print_network(self):
         """Print out the network in main window. Hide tree window"""
-        if self._trees_window:
-            self._trees_window.destroy()
-            self._trees_window = None
+        if self.trees_window:
+            self.trees_window.destroy()
+            self.trees_window = None
         
         self.main_text_widget.config(state="normal")
         self.main_text_widget.delete('1.0', "end")
@@ -414,8 +398,8 @@ class Program(Tk):
         
     def display_network(self):
         """Display input network in the main window."""
-        if self._trees_window:
-            self._trees_window.withdraw()
+        if self.trees_window:
+            self.trees_window.withdraw()
             
         self.net_fig.gca().clear()
         
@@ -465,15 +449,15 @@ class Program(Tk):
         """
         self.trees.draw() #Draw the trees before calling the window
         
-        if self._trees_window:
-            self._trees_window.deiconify()
-            self._trees_window.replace_trees(self.trees)
+        if self.trees_window:
+            self.trees_window.deiconify()
+            self.trees_window.replace_trees(self.trees)
         else:
             #Create window
-            self._trees_window = TreesWindow(self, self.trees, width=self.scaled_width, height=self.scaled_height, title="Trees", **kwargs)            
+            self.trees_window = TreesWindow(self, self.trees, width=self.scaled_width, height=self.scaled_height, title="Trees", **kwargs)            
         
         self._enable_save()
-        print(sys.getrefcount(self._trees_window))
+        print(sys.getrefcount(self.trees_window))
     
     def save_text(self, *_):
         """Saves network and trees in newick format as a text file in the directory that the user specifies."""
@@ -578,10 +562,10 @@ class TreesWindow(Window):
     def __init__(self, main_window, trees_obj, embedded_trees=True, **kwargs):
         super().__init__(**kwargs)
         self.main = main_window
-        self.tree_figures = trees_obj.figures
-        #self.canvases = []
+        self.canvases = []
         self.protocol("WM_DELETE_WINDOW", self._exit)
         self.embedded = embedded_trees
+        self.trees_obj = trees_obj
         
         self.scroll_setup()
         if self.embedded:
@@ -592,7 +576,7 @@ class TreesWindow(Window):
     def display_figures(self):
         """Display the figures from the Trees object."""
         self.canvases = []
-        for fig in self.tree_figures:
+        for fig in self.trees_obj.figures:
             trees_canvas = FigureCanvasTkAgg(fig, master=self.frame)
             trees_canvas.get_tk_widget().pack(side="top", fill="both", expand=1)
             self.canvases.append(trees_canvas)
@@ -627,7 +611,9 @@ class TreesWindow(Window):
     def clear_figures(self):
         """Remove the figures currently displayed in the TreesWindow."""
         for canvas in self.canvases:
+            canvas.get_tk_widget().pack_forget()
             canvas.get_tk_widget().destroy()
+
             
 #         for widget in self.frame.winfo_children():
 #             widget.destroy()
@@ -635,9 +621,10 @@ class TreesWindow(Window):
             
     def replace_trees(self, new_trees_obj):
         """Replace the trees currently displayed."""
-        self.clear_figures()
-        self.tree_figures = new_trees_obj.figures
-        self.display_figures()
+        if self.trees_obj != new_trees_obj:
+            self.clear_figures()
+            self.trees_obj = new_trees_obj
+            self.display_figures()
         
         
     def _exit(self):

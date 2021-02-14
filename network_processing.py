@@ -190,6 +190,7 @@ class Network:
                 
         self._current_network.remove_taxa(labels_to_remove)
 
+
 class InvalidLeaves(Exception):
     """Exception raised for errors in the input leaves."""
 

@@ -54,7 +54,7 @@ displayed above each tree when generating all embedded trees from a network.
 By default, trees are displayed with all labelled leaves.
 
 When calculating drSPR, this opens a window that visualises all entered valid 
-trees with tree number displayed above each tree.
+trees with tree number displayed above each tree if graphics is enabled.
 
 
 Enable graphics:

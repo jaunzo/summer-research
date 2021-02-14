@@ -10,5 +10,7 @@ Graphviz must be installed to enable graph visualisation.
 
 Release notes v2.0:
 - Added drSPR functionality
+- Fixed bug that showed duplicate trees with graphics enabled when trees window 
+  is closed and immediately opened again by clicking "Show trees" button
 
 Python 3.8.6

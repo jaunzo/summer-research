@@ -125,6 +125,7 @@ class StringInputPrompt(Toplevel):
         self.cancel_button.pack(side="right", padx=(10,20))
         
     def change_contents(self, title, prompt, placeholder):
+        """Change title, prompt and placeholder text of this dialog"""
         self.title(title)
         self.prompt_message.configure(text=prompt) 
         self.text_entry.put_placeholder(placeholder)
