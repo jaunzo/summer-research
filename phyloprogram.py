@@ -151,8 +151,8 @@ class Program(Tk):
         self.info_label = Label(self.info_frame, text="")
         self.info_label.pack(side="right", padx=(0,10))
         
-        self.network_label = Label(self.info_frame, text="")
-        self.network_label.pack(side="left", padx=(10, 0))
+        self.file_label = Label(self.info_frame, text="")
+        self.file_label.pack(side="left", padx=(10, 0))
         
     
     def _update_info_bar(self, filename=""):
@@ -164,17 +164,18 @@ class Program(Tk):
         filename : str, optional
             Name of network/trees file opened
         """
-        num_reticulations = self.network.num_reticulations
-        num_labelled_leaves = self.network.num_labelled_leaves
-        info_text = f"{num_reticulations} reticulations, {num_labelled_leaves} labelled leaves"
-        self.info_label["text"] = info_text
+        if self.network:
+            num_reticulations = self.network.num_reticulations
+            num_labelled_leaves = self.network.num_labelled_leaves
+            info_text = f"{num_reticulations} reticulations, {num_labelled_leaves} labelled leaves"
+            self.info_label["text"] = info_text
         
 #         if filename:
 #             network_text = filename
 #         else:
 #             network_text = ""
         
-        self.network_label["text"] = filename
+        self.file_label["text"] = filename
     
         
     def _initialise_main_text_widget(self):
@@ -428,13 +429,13 @@ class Program(Tk):
             
             if text != None:
                 try:
-                    self.get_drspr(text)
+                    self.get_drspr(text, text_file)
                 except MalformedNewickException:
                     error_message = "Could not read trees.\n\Trees must contain at least one labelled leaf and trees must terminate with semicolon."
                     tkinter.messagebox.showerror(title="Open network error", message=error_message)
                     
             
-    def get_drspr(self, input_trees):
+    def get_drspr(self, input_trees, filename=""):
         """
         Get the rspr distance
         
@@ -442,6 +443,9 @@ class Program(Tk):
         ----------
         input_trees : str
             String containing at least 2 trees in newick format delimited by semicolon
+            
+        filename : str, optional
+            Filename of trees text file opened (default="")
         """
         self.network = None
         input_trees = input_trees.translate(str.maketrans('', '', ' \n\t\r'))
@@ -454,6 +458,7 @@ class Program(Tk):
         
         self.net_canvas.get_tk_widget().pack_forget()
         self.main_text_widget.pack(expand=True, fill="both")
+        self._update_info_bar(filename)
         self.print_drspr(self.trees.trees, distances, clusters)
         
         if self.graphics:

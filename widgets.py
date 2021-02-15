@@ -60,7 +60,7 @@ class HoverButton(Button):
     """
     Class for buttons that change background colour when mouse hovers over it.
     """
-    def __init__(self, master: Frame, tooltip_text="", **kwargs):
+    def __init__(self, master, tooltip_text="", **kwargs):
         """
         Parameters
         ----------
