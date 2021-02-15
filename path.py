@@ -3,7 +3,19 @@
 import os
 
 def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
+    """
+    Get absolute path to resource, works for dev and for PyInstaller
+    
+    Parameters
+    ----------
+    relative_path : str
+        Relative path to file from script's location
+        
+    Returns
+    -------
+    str
+        Absolute path to file
+    """
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = sys._MEIPASS

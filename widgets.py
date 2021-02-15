@@ -5,6 +5,18 @@ from tkinter import (Button, Text, Toplevel, Label)
 class TextWithPlaceholder(Text):
     """Extension of Tkinter Text widget with the added function of placeholder text."""
     def __init__(self, master, placeholder, placeholder_colour="grey", **kwargs):
+        """
+        Parameters
+        ----------
+        master : Frame
+            Frame where this widget will be placed in
+            
+        placeholder : str
+            Placeholder text in text widget (default = "")
+            
+        placeholder_colour : str
+            Colour of placeholder text (default is grey)
+        """
         super().__init__(master, **kwargs)
 
         self.placeholder_color = placeholder_colour
@@ -16,8 +28,15 @@ class TextWithPlaceholder(Text):
 
         self.put_placeholder(placeholder)
 
-    def put_placeholder(self, placeholder=None):
-        """Inserts placeholder text in text field."""
+    def put_placeholder(self, placeholder=""):
+        """
+        Inserts placeholder text in text field.
+        
+        Parameters
+        ----------
+        placeholder : str
+            Placeholder text in text widget (default = "")
+        """
         self.delete('1.0', "end")
         if placeholder:
             self.placeholder = placeholder
@@ -41,7 +60,16 @@ class HoverButton(Button):
     """
     Class for buttons that change background colour when mouse hovers over it.
     """
-    def __init__(self, master, tooltip_text="", **kwargs):
+    def __init__(self, master: Frame, tooltip_text="", **kwargs):
+        """
+        Parameters
+        ----------
+        master : Frame
+            Frame where this widget will be placed in
+            
+        tooltip_text " str
+            Message of tooltip when mouse hovers over button (default="")
+        """
         super().__init__(master, **kwargs)
         
         self.bind("<Enter>", self._button_enter)
@@ -83,6 +111,18 @@ class ToolTip:
     Class code based from https://stackoverflow.com/questions/3221956/how-do-i-display-tooltips-in-tkinter
     """
     def __init__(self, widget, text, bind=True):
+        """
+        Parameters
+        ----------
+        widget : tkinter widget
+            Widget to put tooltip
+            
+        text : str
+            Tooltip message
+            
+        bind : bool
+            Bind events to widget if True (default is True)
+        """
         self.waittime = 500     #miliseconds
         self.wraplength = 400   #pixels
         self.widget = widget

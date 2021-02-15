@@ -9,6 +9,27 @@ import drspr as d
 class MultiChoicePrompt(Toplevel):
     """Class that creates a multiple choice prompt window for selecting leaves."""
     def __init__(self, main_window, title, prompt, options, customise_option=False, text_placeholder="", **kwargs):
+        """
+        Parameters
+        ----------
+        main_window : Program
+            Program object which is the main window
+            
+        title : str
+            Title of prompt window
+            
+        prompt : str
+            Prompt text in dialog window
+            
+        options : list[str]
+            List of options that will be displayed in multiple choice prompt
+            
+        customise_option : bool
+            Logic to add option that includes text widget where user can type (default is False)
+            
+        text_placeholder : str
+            Grey placeholder text in text widget (default = "")
+        """
         super().__init__(**kwargs)
         self.title(title)
         self.customise_value = len(options)
@@ -87,7 +108,7 @@ class MultiChoicePrompt(Toplevel):
         
         self.error_message_frame.update()
             
-    def _exit(self):
+    def _exit(self) -> None:
         """Hide window"""
         self._clear_error_messages()
         self.withdraw()
@@ -95,7 +116,26 @@ class MultiChoicePrompt(Toplevel):
 
 class StringInputPrompt(Toplevel):
     """Class for prompt dialog that asks for string input"""
-    def __init__(self, main_window, title, prompt, placeholder, network=True, **kwargs):
+    def __init__(self, main_window, title, prompt, placeholder="", network=True, **kwargs):
+        """
+        Parameters
+        ----------
+        main_window : Program
+            Program object which is the main window
+            
+        title : str
+            Title of prompt window
+            
+        prompt : str
+            Prompt text in dialog window
+            
+        placeholder : str
+            Grey placeholder text in text widget (default = "")
+            
+        network : bool
+            True if input prompt is for processing network manually entered by user, else for processing
+            multiple trees manually entered by user (default is True)
+        """
         super().__init__(**kwargs)
         self.main = main_window
         self.title(title)
@@ -123,8 +163,22 @@ class StringInputPrompt(Toplevel):
         self.ok_button.pack(side="left", padx=(20,10))
         self.cancel_button.pack(side="right", padx=(10,20))
         
-    def change_contents(self, title, prompt, placeholder):
-        """Change title, prompt and placeholder text of this dialog"""
+    def change_contents(self, title, prompt, placeholder=""):
+        """
+        Change title, prompt and placeholder text of this dialog
+        
+        Parameters
+        ----------
+        title : str
+            Title of prompt window
+            
+        prompt : str
+            Prompt text in dialog window
+            
+        placeholder : str
+            Grey placeholder text in text widget (default = "")
+            
+        """
         self.title(title)
         self.prompt_message.configure(text=prompt) 
         self.text_entry.put_placeholder(placeholder)

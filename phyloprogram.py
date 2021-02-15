@@ -61,51 +61,21 @@ class Program(Tk):
         
         self._initialise_main_text_widget()
         
-        
-    
-    
-    def _initialise_main_text_widget(self):
-        self.main_text_widget = Text(self.main_frame, width=25)
-        scroll = Scrollbar(self.main_text_widget, command=self.main_text_widget.yview)
-        self.main_text_widget['yscrollcommand'] = scroll.set
-        scroll.pack(side="right", fill="y")
-    
-        
     def _get_dpi(self):
-        """For private use. Get the dpi of the current screen"""
+        """
+        For private use. Get the dpi of the current screen
+        
+        Returns
+        -------
+        int
+            DPI of current monitor
+        """
         screen = Tk()
         current_dpi = screen.winfo_fpixels("1i")
         screen.destroy()
         return current_dpi
     
     
-    def _initialise_info_bar(self):
-        """For private use. Info bar that displays file opened, number of reticulations and labelled leaves in network"""
-        self.info_frame = Frame(self)
-        self.info_frame.pack(side="bottom", fill="x")
-        
-        self.info_label = Label(self.info_frame, text="")
-        self.info_label.pack(side="right", padx=(0,10))
-        
-        self.network_label = Label(self.info_frame, text="")
-        self.network_label.pack(side="left", padx=(10, 0))
-        
-    
-    def _update_info_bar(self, filename):
-        """For private use. Update the network info when new network is opened"""
-        num_reticulations = self.network.num_reticulations
-        num_labelled_leaves = self.network.num_labelled_leaves
-        info_text = f"{num_reticulations} reticulations, {num_labelled_leaves} labelled leaves"
-        self.info_label["text"] = info_text
-        
-        if filename:
-            network_text = filename
-        else:
-            network_text = ""
-        
-        self.network_label["text"] = network_text
-    
-        
     def _initialise_menu_bar(self):
         """For private use. Initialise the top menu bar and bind shortcuts"""
         menu_bar = Menu(self)
@@ -170,13 +140,50 @@ class Program(Tk):
         ToolTip(graphics_check_box, "Enable graph visualisation for the next entered network")
         
     
+    
+    
+    
+    def _initialise_info_bar(self):
+        """For private use. Info bar that displays file opened, number of reticulations and labelled leaves in network"""
+        self.info_frame = Frame(self)
+        self.info_frame.pack(side="bottom", fill="x")
         
-    def set_graphics(self, *_):
-        """Set if the program draws the network and trees."""
-        if self.graphics_enabled.get() == 1:
-            self.graphics = True
-        else:
-            self.graphics = False
+        self.info_label = Label(self.info_frame, text="")
+        self.info_label.pack(side="right", padx=(0,10))
+        
+        self.network_label = Label(self.info_frame, text="")
+        self.network_label.pack(side="left", padx=(10, 0))
+        
+    
+    def _update_info_bar(self, filename=""):
+        """
+        For private use. Update the network info when new network is opened.
+        
+        Parameters
+        ----------
+        filename : str, optional
+            Name of network/trees file opened
+        """
+        num_reticulations = self.network.num_reticulations
+        num_labelled_leaves = self.network.num_labelled_leaves
+        info_text = f"{num_reticulations} reticulations, {num_labelled_leaves} labelled leaves"
+        self.info_label["text"] = info_text
+        
+#         if filename:
+#             network_text = filename
+#         else:
+#             network_text = ""
+        
+        self.network_label["text"] = filename
+    
+        
+    def _initialise_main_text_widget(self):
+        """Setup the text widget in the main window"""
+        self.main_text_widget = Text(self.main_frame, width=25)
+        scroll = Scrollbar(self.main_text_widget, command=self.main_text_widget.yview)
+        self.main_text_widget['yscrollcommand'] = scroll.set
+        scroll.pack(side="right", fill="y")
+    
         
     def _enable_tree_tools(self):
         """For private use. Buttons involving trees are enabled when a network has successfully been processed and displayed."""
@@ -199,7 +206,19 @@ class Program(Tk):
         
         
     def _scale_window(self, window_length):
-        """For private use. Scales the window based on calculated scale"""
+        """
+        For private use. Scales the window based on calculated scale
+        
+        Parameters
+        ----------
+        window_length : int
+            Window length dimension
+            
+        Returns
+        -------
+        int
+            Scaled window length dimension
+        """
         return round(window_length * self.scale)
     
     def _select_leaves(self):
@@ -211,8 +230,16 @@ class Program(Tk):
             self.select_leaves_prompt = MultiChoicePrompt(self, "Select leaves", "Specify the leaves that will be included in the generated trees.", ["All"],
                           customise_option=True, text_placeholder="e.g. 1, 2, 3, 4")
             
+            
+    def set_graphics(self, *_):
+        """Set if the program draws the network and trees."""
+        if self.graphics_enabled.get() == 1:
+            self.graphics = True
+        else:
+            self.graphics = False
+            
     def about(self):
-        """Display overview of program on window"""
+        """Display overview of program in window"""
         self.about_window = Window(title="About")
         path_file = path.resource_path("about.txt")
         f = open(path_file, "r")
@@ -223,7 +250,7 @@ class Program(Tk):
         text_widget.config(state="disabled")
     
     def manual(self):
-        """Display program manual on window"""
+        """Display program manual in window"""
         self.manual_window = Window(title="Manual", width=self.scaled_width,
                                     height=self.scaled_height//2)
         path_file = path.resource_path("manual.txt")
@@ -238,7 +265,7 @@ class Program(Tk):
         text_widget.config(state="disabled")
         
     def open_github(self):
-        """Open this program's github page."""
+        """Open this program's Github page."""
         webbrowser.open("https://github.com/jaunzo/summer-research", new=2)
         
     def new_network(self, *_):
@@ -249,100 +276,6 @@ class Program(Tk):
             self.input_prompt.deiconify()
         else:
             self.input_prompt = StringInputPrompt(self, "Enter network", "Enter network in extended newick format", "e.g. ((a,(b)#H1), (#H1,c));")
-    
-        print(sys.getrefcount(self.input_prompt))
-    
-    def new_trees(self, *_):
-        """Displays dialog and gets at least 2 trees in newick format inputted by the user"""
-        if self.input_prompt:
-            self.input_prompt.change_contents("Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);")
-            self.input_prompt.update()
-            self.input_prompt.deiconify()
-        else:
-            self.input_prompt = StringInputPrompt(self, "Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);", False)
-        
-        #print(sys.getrefcount(self.trees_window))
-    
-    def open_trees(self, *_):
-        """Opens file that contains at least 2 trees in newick format"""
-        filename =  tkinter.filedialog.askopenfilename(initialdir = self.directory, title = "Open trees...",
-                                                       filetypes = (("text files","*.txt"),("all files","*.*")))
-
-        path = os.path.split(filename)
-        self.directory = path[0]
-        text_file = path[1]
-            
-        if filename != "":
-            f = open(filename, "r")
-            text = f.read().strip()
-            
-            if text != None:
-                try:
-                    self.get_drspr(text)
-                except MalformedNewickException:
-                    error_message = "Could not read trees.\n\Trees must contain at least one labelled leaf and trees must terminate with semicolon."
-                    tkinter.messagebox.showerror(title="Open network error", message=error_message)
-                    
-            
-    def get_drspr(self, input_trees):
-        """Get the rspr distance"""
-        self.network = None
-        input_trees = input_trees.translate(str.maketrans('', '', ' \n\t\r'))
-        trees_array = input_trees.split(";")
-        
-        if not trees_array[-1]:
-            trees_array.pop()
-        
-        (distances, clusters, self.trees) = d.calculate_drspr(trees_array)
-        
-        self.net_canvas.get_tk_widget().pack_forget()
-        self.main_text_widget.pack(expand=True, fill="both")
-        self.print_drspr(self.trees.trees, distances, clusters)
-        
-        if self.graphics:
-            self._enable_save()
-            self._enable_tree_display()
-            
-        else:
-            self._enable_text_save()
-            
-            
-        
-                
-    def print_drspr(self, trees_array, distances, clusters):
-        """Output rspr distance information in the main window"""
-        self.main_text_widget.config(state="normal")
-        self.main_text_widget.delete('1.0', "end")
-        
-        
-        self.main_text_widget.insert("end", "TREES:\n")
-        for i, tree in enumerate(trees_array, start=1):
-            self.main_text_widget.insert("end", f"t{i}:\n{tree}\n\n")
-        
-        length = len(distances)
-
-        if length == 1:
-            self.main_text_widget.insert("end", f"\ndrSPR = {distances[0]}\n")
-            self.main_text_widget.insert("end", f"Clusters: {clusters[0]}\n")
-            
-        else:
-        
-            #Printing matrix
-            self.main_text_widget.insert("end", "\nDISTANCE MATRIX:\n")
-            for i in range(length):
-                self.main_text_widget.insert("end", f"{', '.join(distances[i])}\n")
-               
-            #Printing cluster
-            self.main_text_widget.insert("end", "\n\nCLUSTERS:")
-            for i in range(length-1):
-                self.main_text_widget.insert("end", f"\nClusters compared with t{i+1}:\n")
-                for j in range(i+1, len(clusters[i])):
-                    self.main_text_widget.insert("end",
-                        f"t{j+1} (drSPR = {distances[i][j]}): {' '.join(clusters[i][j])}\n")
-        
-        self.main_text_widget.config(state="disabled")
-        
-        
         
             
     def open_network(self, *_):
@@ -367,8 +300,18 @@ class Program(Tk):
                     tkinter.messagebox.showerror(title="Open network error", message=error_message)
         
         
-    def generate_network(self, net_newick, filename=None):
-        """Generate the network object and display it depending on graphics mode"""
+    def generate_network(self, net_newick, filename=""):
+        """
+        Generate the network object and display it depending on graphics mode
+        
+        Parameters
+        ----------
+        net_newick : str
+            Network in extended newick format
+            
+        filename : str, optional
+            Filename of network opened (default="")
+        """
         self.network = Network(net_newick, self.net_fig, self.graphics)
         self._update_info_bar(filename)
         self._enable_tree_tools()
@@ -459,6 +402,117 @@ class Program(Tk):
         self._enable_save()
         print(sys.getrefcount(self.trees_window))
     
+    def new_trees(self, *_):
+        """Displays dialog and gets at least 2 trees in newick format inputted by the user"""
+        if self.input_prompt:
+            self.input_prompt.change_contents("Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);")
+            self.input_prompt.update()
+            self.input_prompt.deiconify()
+        else:
+            self.input_prompt = StringInputPrompt(self, "Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);", False)
+        
+        #print(sys.getrefcount(self.trees_window))
+    
+    def open_trees(self, *_):
+        """Opens file that contains at least 2 trees in newick format"""
+        filename =  tkinter.filedialog.askopenfilename(initialdir = self.directory, title = "Open trees...",
+                                                       filetypes = (("text files","*.txt"),("all files","*.*")))
+
+        path = os.path.split(filename)
+        self.directory = path[0]
+        text_file = path[1]
+            
+        if filename != "":
+            f = open(filename, "r")
+            text = f.read().strip()
+            
+            if text != None:
+                try:
+                    self.get_drspr(text)
+                except MalformedNewickException:
+                    error_message = "Could not read trees.\n\Trees must contain at least one labelled leaf and trees must terminate with semicolon."
+                    tkinter.messagebox.showerror(title="Open network error", message=error_message)
+                    
+            
+    def get_drspr(self, input_trees):
+        """
+        Get the rspr distance
+        
+        Parameters
+        ----------
+        input_trees : str
+            String containing at least 2 trees in newick format delimited by semicolon
+        """
+        self.network = None
+        input_trees = input_trees.translate(str.maketrans('', '', ' \n\t\r'))
+        trees_array = input_trees.split(";")
+        
+        if not trees_array[-1]:
+            trees_array.pop()
+        
+        (distances, clusters, self.trees) = d.calculate_drspr(trees_array)
+        
+        self.net_canvas.get_tk_widget().pack_forget()
+        self.main_text_widget.pack(expand=True, fill="both")
+        self.print_drspr(self.trees.trees, distances, clusters)
+        
+        if self.graphics:
+            self._enable_save()
+            self._enable_tree_display()
+            
+        else:
+            self._enable_text_save()
+            
+            
+        
+                
+    def print_drspr(self, trees_array, distances, clusters):
+        """
+        Output rspr distance information in the main window
+        
+        Parameters
+        ----------
+        trees_array : list[PhylogeneticNetwork]
+            Array of PhylogeneticNetwork objects
+            
+        distances : list[str]
+            Array of distances
+            
+        clusters : list[str]
+            Array of clusters
+        """
+        self.main_text_widget.config(state="normal")
+        self.main_text_widget.delete('1.0', "end")
+        
+        self.main_text_widget.insert("end", "TREES:\n")
+        for i, tree in enumerate(trees_array, start=1):
+            self.main_text_widget.insert("end", f"t{i}:\n{tree}\n\n")
+        
+        length = len(distances)
+
+        if length == 1:
+            self.main_text_widget.insert("end", f"\ndrSPR = {distances[0]}\n")
+            self.main_text_widget.insert("end", f"Clusters: {clusters[0]}\n")
+            
+        else:
+        
+            #Printing matrix
+            self.main_text_widget.insert("end", "\nDISTANCE MATRIX:\n")
+            for i in range(length):
+                self.main_text_widget.insert("end", f"{', '.join(distances[i])}\n")
+               
+            #Printing cluster
+            self.main_text_widget.insert("end", "\n\nCLUSTERS:")
+            for i in range(length-1):
+                self.main_text_widget.insert("end", f"\nClusters compared with t{i+1}:\n")
+                for j in range(i+1, len(clusters[i])):
+                    self.main_text_widget.insert("end",
+                        f"t{j+1} (drSPR = {distances[i][j]}): {' '.join(clusters[i][j])}\n")
+        
+        self.main_text_widget.config(state="disabled")
+        
+    
+    
     def save_text(self, *_):
         """Saves network and trees in newick format as a text file in the directory that the user specifies."""
         f =  tkinter.filedialog.asksaveasfile(initialdir = self.directory, title = "Saving network and trees as text file", 
@@ -473,6 +527,7 @@ class Program(Tk):
         
         f.write(file_contents)
         f.close()
+        
         
     def save_image(self, *_):
         """Saves all figures as a series of images in the directory that the user specifies."""
@@ -493,6 +548,7 @@ class Program(Tk):
             tree_fig.savefig(f"{abs_path}{directory}/trees{str(count)}.png", bbox_inches="tight")
             count += 1
         
+        
     def _exit(self):
         """Display prompt dialog when user exits application."""
         MsgBox = tk.messagebox.askquestion ("Exit Application","Are you sure you want to exit the application?",
@@ -505,6 +561,18 @@ class Program(Tk):
 class Window(Toplevel):
     """Base class for customised windows."""
     def __init__(self, title, width=0, height=0, **kwargs):
+        """
+        Parameters
+        ----------
+        title : str
+            Title of the window
+            
+        width : int, optional
+            Width of the window
+            
+        height : int, optional
+            Height of the window
+        """
         super().__init__(**kwargs)
         if width == 0 or height == 0:
             self.geometry("")
@@ -512,6 +580,7 @@ class Window(Toplevel):
             self.geometry(f"{width}x{height}")
         
         self.title(title)
+    
     
     def scroll_setup(self):
         """Make the window have a scrollable panel."""
@@ -559,7 +628,19 @@ class Window(Toplevel):
         
 class TreesWindow(Window):
     """Class for window that displays visualisation of trees."""
-    def __init__(self, main_window, trees_obj, embedded_trees=True, **kwargs):
+    def __init__(self, main_window, trees_obj, embedded_trees=True, **kwargs) -> None:
+        """
+        Parameters
+        ----------
+        main_window : Program
+            Program class instance which is the program's main window
+            
+        trees_obj : EmbeddedTrees or Trees
+            Object that contains the tree figures to be displayed
+            
+        embedded_trees : bool, optional
+            Logic to tell whether to display additional information associated with embedded trees (default is True)
+        """
         super().__init__(**kwargs)
         self.main = main_window
         self.canvases = []
@@ -620,7 +701,14 @@ class TreesWindow(Window):
             
             
     def replace_trees(self, new_trees_obj):
-        """Replace the trees currently displayed."""
+        """
+        Replace the trees currently displayed.
+        
+        Parameters
+        ----------
+        new_trees_obj : EmbeddedTrees or Trees
+            Object that replaces the current trees object
+        """
         if self.trees_obj != new_trees_obj:
             self.clear_figures()
             self.trees_obj = new_trees_obj
@@ -629,7 +717,6 @@ class TreesWindow(Window):
         
     def _exit(self):
         """Hide window"""
-        #self.main.trees_window = None
         self.withdraw()
         
 

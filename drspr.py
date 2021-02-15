@@ -37,6 +37,17 @@ def rspr(tree1, tree2):
     """
     Runs an external executable that calculates the rspr of 2 binary
     phylogenetic trees
+    
+    Parameters
+    ----------
+    tree1 : str
+    tree2 : str
+        Two trees to compute distance
+        
+    Returns
+    -------
+    tuple[list[str], list[str]]
+        Tuple of array of distances and array of clusters
     """
     input_string = tree1 + "\n" + tree2
     
@@ -83,6 +94,16 @@ def rspr(tree1, tree2):
 def rspr_pairwise(trees):
     """
     Takes a list of trees and runs rspr for every pair of trees
+    
+    Parameters
+    ----------
+    trees : list[str]
+        Array of trees in newick format
+        
+    Returns
+    -------
+    tuple(list[str], list[str], list[Tree])
+        Tuple of distance array, clusters array and trees array
     """
     length = len(trees)
     
@@ -121,14 +142,16 @@ def rspr_pairwise(trees):
 def calculate_drspr(trees_array):
     """
     Calculates drSPR. If more than 2 trees are given, distances are calculated pairwise
-    Parameter:
-    trees_array: array of trees in newick string
     
-    Returns:
-    distances: array of distances
-    clusters: array of clusters
-    trees_obj: Trees object
-    
+    Parameters
+    ----------
+    trees_array : list[str]
+        Array of trees in newick format
+        
+    Returns
+    -------
+    tuple[list[str], list[str], Trees]
+        Tuple of distance array, clusters array and Trees object
     """
     length = len(trees_array)
     
@@ -139,7 +162,6 @@ def calculate_drspr(trees_array):
         for i in range(len(trees_array)):
             try:
                 trees_array[i] = Tree(trees_array[i] + ";", f"t{i+1}") 
-                
                 
             except MalformedNewickException as e:
                 trees_array[i] = None
@@ -167,11 +189,26 @@ def calculate_drspr(trees_array):
 class Tree(PhylogeneticNetwork):
     """Class for trees involved in drSPR function"""
     def __init__(self, tree, number):
+        """
+        Parameters
+        ----------
+        tree : str
+            Single tree in newick format
+            
+        number : str
+            Tree id
+        """
         super().__init__(tree)
         self.id = number
         
     @property
     def leaves(self):
+        """
+        Returns
+        -------
+        set(str)
+            Set of labelled leaves in tree
+        """
         leaves = super().leaves
         labelled_leaves = set()
         
@@ -188,10 +225,25 @@ class Tree(PhylogeneticNetwork):
 class Trees:
     """Class for collection of trees"""
     def __init__(self, trees_array):
+        """
+        Parameters
+        ----------
+        trees_array : list[Tree]
+            Array of Tree objects
+        """
         self.trees = trees_array
         self.figures = []
         
     def draw(self):
+        """
+        Returns
+        -------
+        list[Figure]
+            Array of figures where trees are drawn
+        """
+        
+        #Number of rows and cols per figure
+        #i.e rows * cols supbplots/trees per figure
         rows = 1
         cols = 2
         
