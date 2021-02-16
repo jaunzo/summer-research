@@ -108,7 +108,7 @@ class MultiChoicePrompt(Toplevel):
         
         self.error_message_frame.update()
             
-    def _exit(self) -> None:
+    def _exit(self):
         """Hide window"""
         self._clear_error_messages()
         self.withdraw()

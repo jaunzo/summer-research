@@ -126,7 +126,7 @@ class Network:
         return contents
     
     @property
-    def newick(self) -> str:
+    def newick(self):
         """
         Extended newick string of network
         
@@ -138,7 +138,7 @@ class Network:
         return self._newick
 
     @property
-    def current_network(self) -> PhylogeneticNetwork:
+    def current_network(self):
         """
         PhylogeneticNetwork instance of the current network
         
@@ -154,7 +154,7 @@ class Network:
         #Display input network
         create_graph(self._original_network, self.figure.gca())
         
-    def set_current_selected_leaves(self, selected_leaves) -> None:
+    def set_current_selected_leaves(self, selected_leaves):
         """
         Method that takes in a string of leaves and sets the leaves to filter trees
         
@@ -201,7 +201,7 @@ class Network:
         Part of initialisation process. Get all 2^r unsuppressed trees
         
         Returns
-        list[PhylogeneticNetwork]
+        tuple[PhylogeneticNetwork]
             Array of unsuppressed trees
         """
         #Get number of reticulations
@@ -223,7 +223,7 @@ class Network:
                     
             prev_networks = copy.deepcopy(new_networks)
         
-        return prev_networks #array of PhylogeneticNetwork objects
+        return tuple(prev_networks) #array of PhylogeneticNetwork objects
         
     
     def process(self):
@@ -280,13 +280,15 @@ class EmbeddedTrees:
         network : Network
             Network where trees came from
             
-        leaves : tuple(str)
+        leaves : tuple[str]
             Selected leaves that will be retained when trees are suppressed
         """
         self.trees_data = {} #Dictionary of unique tree newicks with count
         self.tree_figs = []
         self.network = network
         self._selected_leaves = leaves
+        
+    
         
     @property
     def num_unique_trees(self):
@@ -338,7 +340,7 @@ class EmbeddedTrees:
         """
         return tuple(self._selected_leaves)
     
-    @cached_property
+    @property
     def text(self):
         """
         Text representation of the trees.
@@ -360,18 +362,14 @@ class EmbeddedTrees:
         """Get and plot all unique trees displayed by the given network with the number of occurence displayed above the plot."""
         unique_tree_newicks = set()
 
-        for tree in self.network.all_trees:
+        for unsuppressed_tree in self.network.all_trees:
+            tree = PhylogeneticNetwork(unsuppressed_tree.eNewick())
+            
             #Reduce tree
             tree.remove_elementary_nodes()
 
-            unlabelled_leaves = self.leaves_to_remove(tree)
-            
-            #Removing any dummy leaves that may occur when removing reticulation arcs in the network
-            for leaf in unlabelled_leaves:
-                tree.remove_node_and_reconnect(leaf)
-                
-            tree.clear_cache()
-            tree.remove_elementary_nodes()
+            self.remove_unselected_leaves(tree)
+            self.remove_dummy_leaves(tree)
             
             tree_newick = tree.eNewick()
             
@@ -384,20 +382,39 @@ class EmbeddedTrees:
                 unique_tree_newicks.add(tree_newick)
 
             self.trees_data[tree_newick].append(tree)
-            
-    def leaves_to_remove(self, tree):
+    
+    def remove_unselected_leaves(self, tree):
         """
-        Get set of dummy leaf nodes that are not labelled
+        Get set of dummy leaf nodes and unselected leaf nodes
+        
+        Parameters
+        ----------
+        tree : PhylogeneticNetwork
+            Tree to get the unselected leaves
+        """
+        leaves = tree.leaves
+        unselected_leaves = set()
+        
+        for leaf in leaves:
+            if tree.label(leaf) not in self._selected_leaves:
+                unselected_leaves.add(leaf)
+                
+        #Removing any unselected leaves
+        for leaf in unselected_leaves:
+            tree.remove_node_and_reconnect(leaf)
+            
+        tree.clear_cache()
+        tree.remove_elementary_nodes()
+        
+    
+    def remove_dummy_leaves(self, tree):
+        """
+        Get set of dummy leaf nodes and unselected leaf nodes
         
         Parameters
         ----------
         tree : PhylogeneticNetwork
             Tree to get the dummy leaves
-        
-        Returns
-        -------
-        set[str]
-            Set of dummy leaf nodes that will be removed from tree
         """
         leaves = tree.leaves
         unlabelled_leaves = set()
@@ -405,17 +422,29 @@ class EmbeddedTrees:
         for leaf in leaves:
             if not tree.is_labeled(leaf):
                 unlabelled_leaves.add(leaf)
-                
-        return unlabelled_leaves
+         
+         #Removing any dummy leaves that may occur when removing reticulation arcs in the network
+        for leaf in unlabelled_leaves:
+            tree.remove_node_and_reconnect(leaf)
+            
+        tree.clear_cache()
+        tree.remove_elementary_nodes()
+        #return unlabelled_leaves
         
-    def draw(self):
+    def draw(self, close_figs=True):
         """
         Draw all distinct trees
+        
+        Parameters
+        ----------
+        close_figs : bool
+            Logic to close tree figures that are drawn (default is True). False if you want to use matplotlib's
+            figure interface instead of phyloprogram front end.
         """
         tree_axes = {} #Dictionary of unique tree newicks with plot axes
         unique_plot_count = 1
         
-        unique_trees_fig = plt.figure("Output trees")
+        unique_trees_fig = plt.figure()
         self.tree_figs.append(unique_trees_fig)
         
         rows = 1
@@ -429,7 +458,8 @@ class EmbeddedTrees:
                 unique_plot_count = 1
                 
                 #Close open figures to save memory
-                #plt.close("all") #Comment this line if you want to show all figures through matplotlib's figure manager
+                if close_figs:
+                    plt.close("all") #Comment this line if you want to show all figures through matplotlib's figure manager
                 
                 #Create new figure
                 unique_trees_fig = plt.figure()
@@ -451,15 +481,24 @@ class EmbeddedTrees:
             tree_count = self.trees_data[tree_newick][0]
             tree_ax.title.set_text(tree_count)
             
-        #plt.show()
-            
             
 if __name__ == "__main__":
     net_newick = "(((1, (2) #H2), ((#H2, #H3))#H1), (#H1, ((3)#H3, 4)));"
     figure = plt.figure("Network")
     network = Network(net_newick, figure, True)
+    network.set_current_selected_leaves("1,2,3,4")
+    network._original_network.draw()
+    print(network.text)
     
     trees = network.process()
-    trees.draw()
+    trees.draw(False)
+    print(trees.text)
     
+    plt.show()
+    
+    network.set_current_selected_leaves("1,2,3")
+    trees = network.process()
+    trees.draw(False)
+    
+    print(trees.text)
     plt.show()

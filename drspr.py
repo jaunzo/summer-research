@@ -234,8 +234,16 @@ class Trees:
         self.trees = trees_array
         self.figures = []
         
-    def draw(self):
+    def draw(self, close_figs=True):
         """
+        Draw input trees
+
+        Parameters
+        ----------
+        close_figs : bool
+            Logic to close tree figures that are drawn (default is True). False if you want to use matplotlib's
+            figure interface instead of phyloprogram front end.
+            
         Returns
         -------
         list[Figure]
@@ -254,7 +262,8 @@ class Trees:
             if plot_number == 0:
                 
                 #Close open figures
-                plt.close("all")
+                if close_figs:
+                    plt.close("all")
                 
                 #Create new figure
                 figure = plt.figure()
@@ -285,9 +294,11 @@ if __name__ == "__main__":
 #     trees.append("(((1,4),2),3)")
     
     (distances, clusters, trees_obj) = calculate_drspr(trees)
-    
-    
     length = len(distances)
+    
+    print("TREES")
+    for i, tree in enumerate(trees, start=1):
+        print(f"t{i}:\n{tree}\n")
 
     if length == 1:
         print(f"drSPR = {distances[0]}")
@@ -295,12 +306,14 @@ if __name__ == "__main__":
         
         
     else:
+        print("MATRIX")
         #Printing matrix
         for i in range(length):
             print(", ".join(distances[i]))
             
         print()
             
+        print("CLUSTERS")
         for i in range(length-1):
             print(f"Clusters compared with t{i+1}:")
             for j in range(i+1, len(clusters[i])):
@@ -308,7 +321,9 @@ if __name__ == "__main__":
                 
             print()
             
-    #figures = trees_obj.draw()
+    #Draw trees
+    figures = trees_obj.draw(False)
+    plt.show()
     
     
     

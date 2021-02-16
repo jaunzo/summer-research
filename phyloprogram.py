@@ -32,7 +32,8 @@ class Program(Tk):
         self.tk.call("tk", "scaling", self.scale + 0.5)
         
         self.net_frame = None
-        self.directory = ""
+        self.net_directory = ""
+        self.trees_directory = ""
         self.net_fig = None
         self.trees_window = None
         
@@ -96,8 +97,10 @@ class Program(Tk):
         self.save_sub_menu.add_command(label="Text file", command=self.save_text, accelerator="Ctrl+Shift+T")
         self.save_sub_menu.add_command(label="Images", command=self.save_image, accelerator="Ctrl+Shift+I")
         self.file_menu.add_cascade(label="Save as...", menu=self.save_sub_menu)
-        self.file_menu.entryconfigure("Save as...", state = "disabled")
+        self.save_sub_menu.entryconfigure("Text file", state = "disabled")
         self.save_sub_menu.entryconfigure("Images", state="disabled")
+        self.text_save_enabled = False
+        self.image_save_enabled = False
         
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Exit", command=self._exit)
@@ -140,9 +143,6 @@ class Program(Tk):
         ToolTip(graphics_check_box, "Enable graph visualisation for the next entered network")
         
     
-    
-    
-    
     def _initialise_info_bar(self):
         """For private use. Info bar that displays file opened, number of reticulations and labelled leaves in network"""
         self.info_frame = Frame(self)
@@ -170,11 +170,6 @@ class Program(Tk):
             info_text = f"{num_reticulations} reticulations, {num_labelled_leaves} labelled leaves"
             self.info_label["text"] = info_text
         
-#         if filename:
-#             network_text = filename
-#         else:
-#             network_text = ""
-        
         self.file_label["text"] = filename
     
         
@@ -193,16 +188,21 @@ class Program(Tk):
         
     def _enable_tree_display(self):
         """For private use. Show trees button enabled when graphics enabled and calculating drSPR"""
+        self.select_leaves_button.config(state = "disabled")
         self.display_trees_button.config(state = "normal")
     
     def _enable_save(self):
         """For private use. Save functions are enabled when a network and trees has successfully been processed and displayed."""
-        self.file_menu.entryconfigure("Save as...", state = "normal")
+        self.text_save_enabled = True
+        self.image_save_enabled = True
+        self.save_sub_menu.entryconfigure("Text file", state = "normal")
         self.save_sub_menu.entryconfigure("Images", state="normal")
         
     def _enable_text_save(self):
         """For private use. Used when visualisation is disabled. Only save as text enabled"""
-        self.file_menu.entryconfigure("Save as...", state = "normal")
+        self.text_save_enabled = True
+        self.image_save_enabled = False
+        self.save_sub_menu.entryconfigure("Text file", state = "normal")
         self.save_sub_menu.entryconfigure("Images", state="disabled")
         
         
@@ -281,11 +281,11 @@ class Program(Tk):
             
     def open_network(self, *_):
         """Displays open file prompt and processes a text file that contains the network in extended newick format."""
-        filename =  tkinter.filedialog.askopenfilename(initialdir = self.directory, title = "Open network...",
+        filename =  tkinter.filedialog.askopenfilename(initialdir = self.net_directory, title = "Open network...",
                                                        filetypes = (("text files","*.txt"),("all files","*.*")))
 
         path = os.path.split(filename)
-        self.directory = path[0]
+        self.net_directory = path[0]
         text_file = path[1]
             
         if filename != "":
@@ -368,6 +368,7 @@ class Program(Tk):
             self.trees = self.network.process()
             
             if self.network.graphics:
+                self.trees.draw()
                 self.display_trees()
             else:
                 self.print_trees()
@@ -391,8 +392,6 @@ class Program(Tk):
         Displays trees in a window when user clicks "Show trees" or selects leaves. Only one trees window is
         displayed at a time
         """
-        self.trees.draw() #Draw the trees before calling the window
-        
         if self.trees_window:
             self.trees_window.deiconify()
             self.trees_window.replace_trees(self.trees)
@@ -401,7 +400,6 @@ class Program(Tk):
             self.trees_window = TreesWindow(self, self.trees, width=self.scaled_width, height=self.scaled_height, title="Trees", **kwargs)            
         
         self._enable_save()
-        print(sys.getrefcount(self.trees_window))
     
     def new_trees(self, *_):
         """Displays dialog and gets at least 2 trees in newick format inputted by the user"""
@@ -411,16 +409,15 @@ class Program(Tk):
             self.input_prompt.deiconify()
         else:
             self.input_prompt = StringInputPrompt(self, "Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);", False)
-        
-        #print(sys.getrefcount(self.trees_window))
+
     
     def open_trees(self, *_):
         """Opens file that contains at least 2 trees in newick format"""
-        filename =  tkinter.filedialog.askopenfilename(initialdir = self.directory, title = "Open trees...",
+        filename =  tkinter.filedialog.askopenfilename(initialdir = self.trees_directory, title = "Open trees...",
                                                        filetypes = (("text files","*.txt"),("all files","*.*")))
 
         path = os.path.split(filename)
-        self.directory = path[0]
+        self.trees_directory = path[0]
         text_file = path[1]
             
         if filename != "":
@@ -447,6 +444,9 @@ class Program(Tk):
         filename : str, optional
             Filename of trees text file opened (default="")
         """
+        if self.trees_window:
+            self.trees_window.withdraw()
+            
         self.network = None
         input_trees = input_trees.translate(str.maketrans('', '', ' \n\t\r'))
         trees_array = input_trees.split(";")
@@ -464,13 +464,12 @@ class Program(Tk):
         if self.graphics:
             self._enable_save()
             self._enable_tree_display()
+            self.trees.draw()
             
         else:
             self._enable_text_save()
             
             
-        
-                
     def print_drspr(self, trees_array, distances, clusters):
         """
         Output rspr distance information in the main window
@@ -520,38 +519,57 @@ class Program(Tk):
     
     def save_text(self, *_):
         """Saves network and trees in newick format as a text file in the directory that the user specifies."""
-        f =  tkinter.filedialog.asksaveasfile(initialdir = self.directory, title = "Saving network and trees as text file", 
-                                      filetypes = [("Text file","*.txt")], 
-                                      defaultextension = [("Text file", "*.txt")])
-        
-        if f is None: #if dialog closed with "cancel".
-            return
-        
-        file_contents = self.network.text
-        file_contents += self.trees.text
-        
-        f.write(file_contents)
-        f.close()
+        if self.text_save_enabled:
+            if self.network:
+                location = self.net_directory
+                file_contents = self.network.text
+                file_contents += self.trees.text
+                title = "Saving network and trees as text file"
+            else:
+                location = self.trees_directory
+                file_contents = self.main_text_widget.get("1.0","end")
+                title = "Saving trees as text file"
+            
+            f =  tkinter.filedialog.asksaveasfile(initialdir = location, title = title, 
+                                          filetypes = [("Text file","*.txt")], 
+                                          defaultextension = [("Text file", "*.txt")])
+            
+            if f is None: #if dialog closed with "cancel".
+                return
+            
+            
+            f.write(file_contents)
+            f.close()
         
         
     def save_image(self, *_):
         """Saves all figures as a series of images in the directory that the user specifies."""
-        directory = tkinter.filedialog.askdirectory(initialdir = self.directory, title = "Select directory to save images")
-        
-        abs_path = os.path.dirname(__file__)
-        export_path = abs_path + directory 
+        if self.image_save_enabled:
+            if self.network:
+                location = self.net_directory
+                title = "Select directory to save network and tree images"
+            else:
+                location = self.trees_directory
+                title = "Select directory to save tree images"
+            
+            directory = tkinter.filedialog.askdirectory(initialdir = location, title = title)
+            
+            abs_path = os.path.dirname(__file__)
+            export_path = abs_path + directory 
 
-        #Export network
-        if directory is None: #if dialog closed with "cancel".
-            return
-        
-        self.net_fig.savefig(export_path + "/network.png", bbox_inches="tight")
-        
-        #Export trees
-        count = 1
-        for tree_fig in self.trees.figures:
-            tree_fig.savefig(f"{abs_path}{directory}/trees{str(count)}.png", bbox_inches="tight")
-            count += 1
+            #Export network
+            if directory is None: #if dialog closed with "cancel".
+                return
+            
+            if self.network:
+                print("network")
+                self.net_fig.savefig(export_path + "/network.png", bbox_inches="tight")
+            
+            #Export trees
+            count = 1
+            for tree_fig in self.trees.figures:
+                tree_fig.savefig(f"{abs_path}{directory}/trees{str(count)}.png", bbox_inches="tight")
+                count += 1
         
         
     def _exit(self):
@@ -633,7 +651,7 @@ class Window(Toplevel):
         
 class TreesWindow(Window):
     """Class for window that displays visualisation of trees."""
-    def __init__(self, main_window, trees_obj, embedded_trees=True, **kwargs) -> None:
+    def __init__(self, main_window, trees_obj, embedded_trees=True, **kwargs):
         """
         Parameters
         ----------
@@ -677,10 +695,11 @@ class TreesWindow(Window):
         
     def _update_info_bar(self):
         """Update trees info"""
-        num_unique_trees = self.main.trees.num_unique_trees
-        num_total_trees = self.main.network.total_trees
-        info_text = f"{num_unique_trees} distinct trees, {num_total_trees} total trees"
-        self.info_label["text"] = info_text
+        if self.main.network:
+            num_unique_trees = self.main.trees.num_unique_trees
+            num_total_trees = self.main.network.total_trees
+            info_text = f"{num_unique_trees} distinct trees, {num_total_trees} total trees"
+            self.info_label["text"] = info_text
       
         
     def _initialise_info_bar(self):
@@ -714,7 +733,7 @@ class TreesWindow(Window):
         new_trees_obj : EmbeddedTrees or Trees
             Object that replaces the current trees object
         """
-        if self.trees_obj != new_trees_obj:
+        if self.trees_obj != new_trees_obj or self.trees_obj.leaves != new_trees_obj.leaves:
             self.clear_figures()
             self.trees_obj = new_trees_obj
             self.display_figures()
