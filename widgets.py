@@ -1,23 +1,48 @@
-"""Helper module for constructing gui of application. Defines customised widgets."""
+"""
+Helper module for constructing gui of application. Defines customised widgets.
+"""
 
 from tkinter import (Button, Text, Toplevel, Label)
             
 class TextWithPlaceholder(Text):
     """Extension of Tkinter Text widget with the added function of placeholder text."""
     def __init__(self, master, placeholder, placeholder_colour="grey", **kwargs):
+        """
+        Parameters
+        ----------
+        master : Frame
+            Frame where this widget will be placed in
+            
+        placeholder : str
+            Placeholder text in text widget (default = "")
+            
+        placeholder_colour : str
+            Colour of placeholder text (default is grey)
+        """
         super().__init__(master, **kwargs)
 
-        self.placeholder = placeholder
         self.placeholder_color = placeholder_colour
         self.default_fg_color = self["fg"]
+        self.placeholder = placeholder
 
         self.bind("<FocusIn>", self.focus_in)
         self.bind("<FocusOut>", self.focus_out)
 
-        self._put_placeholder()
+        self.put_placeholder(placeholder)
 
-    def _put_placeholder(self):
-        """Inserts placeholder text in text field."""
+    def put_placeholder(self, placeholder=""):
+        """
+        Inserts placeholder text in text field.
+        
+        Parameters
+        ----------
+        placeholder : str
+            Placeholder text in text widget (default = "")
+        """
+        self.delete('1.0', "end")
+        if placeholder:
+            self.placeholder = placeholder
+        
         self.insert("1.0", self.placeholder)
         self["fg"] = self.placeholder_color
 
@@ -31,13 +56,22 @@ class TextWithPlaceholder(Text):
         """Put placeholder text in the text field if user clicks out of the text field and hasn"t typed in it"""
         string = self.get("1.0", "end").strip()
         if string == "":
-            self._put_placeholder()
+            self.put_placeholder(self.placeholder)
             
 class HoverButton(Button):
     """
     Class for buttons that change background colour when mouse hovers over it.
     """
     def __init__(self, master, tooltip_text="", **kwargs):
+        """
+        Parameters
+        ----------
+        master : Frame
+            Frame where this widget will be placed in
+            
+        tooltip_text " str
+            Message of tooltip when mouse hovers over button (default="")
+        """
         super().__init__(master, **kwargs)
         
         self.bind("<Enter>", self._button_enter)
@@ -79,6 +113,18 @@ class ToolTip:
     Class code based from https://stackoverflow.com/questions/3221956/how-do-i-display-tooltips-in-tkinter
     """
     def __init__(self, widget, text, bind=True):
+        """
+        Parameters
+        ----------
+        widget : tkinter widget
+            Widget to put tooltip
+            
+        text : str
+            Tooltip message
+            
+        bind : bool
+            Bind events to widget if True (default is True)
+        """
         self.waittime = 500     #miliseconds
         self.wraplength = 400   #pixels
         self.widget = widget

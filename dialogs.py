@@ -1,13 +1,37 @@
-"""Module that contains classes for the dialogue boxes"""
+"""
+Module that contains classes for the dialogue boxes
+"""
 
 from tkinter import (Toplevel, Frame, Button, Label, IntVar, Radiobutton)
 from widgets import (TextWithPlaceholder)
 from phylonetwork import MalformedNewickException
 from network_processing import InvalidLeaves
+import drspr as d
 
 class MultiChoicePrompt(Toplevel):
     """Class that creates a multiple choice prompt window for selecting leaves."""
     def __init__(self, main_window, title, prompt, options, customise_option=False, text_placeholder="", **kwargs):
+        """
+        Parameters
+        ----------
+        main_window : Program
+            Program object which is the main window
+            
+        title : str
+            Title of prompt window
+            
+        prompt : str
+            Prompt text in dialog window
+            
+        options : list[str]
+            List of options that will be displayed in multiple choice prompt
+            
+        customise_option : bool
+            Logic to add option that includes text widget where user can type (default is False)
+            
+        text_placeholder : str
+            Grey placeholder text in text widget (default = "")
+        """
         super().__init__(**kwargs)
         self.title(title)
         self.customise_value = len(options)
@@ -15,12 +39,11 @@ class MultiChoicePrompt(Toplevel):
         self.text_placeholder = text_placeholder
         self.protocol("WM_DELETE_WINDOW", self._exit)
         
+        prompt_frame = Frame(self)
+        prompt_frame.pack(side="top")
+        prompt_frame.bind("<ButtonRelease-1>", self._text_focus_off)
         
-        self.prompt_frame = Frame(self)
-        self.prompt_frame.pack(side="top")
-        self.prompt_frame.bind("<ButtonRelease-1>", self._text_focus_off)
-        
-        prompt_message = Label(self.prompt_frame, text=prompt)
+        prompt_message = Label(prompt_frame, text=prompt)
         prompt_message.pack(pady=(20, 10), padx=20)
         
         self.radio_frame = Frame(self)
@@ -95,21 +118,40 @@ class MultiChoicePrompt(Toplevel):
 
 class StringInputPrompt(Toplevel):
     """Class for prompt dialog that asks for string input"""
-    def __init__(self, main_window, title, prompt, **kwargs):
+    def __init__(self, main_window, title, prompt, placeholder="", network=True, **kwargs):
+        """
+        Parameters
+        ----------
+        main_window : Program
+            Program object which is the main window
+            
+        title : str
+            Title of prompt window
+            
+        prompt : str
+            Prompt text in dialog window
+            
+        placeholder : str
+            Grey placeholder text in text widget (default = "")
+            
+        network : bool
+            True if input prompt is for processing network manually entered by user, else for processing
+            multiple trees manually entered by user (default is True)
+        """
         super().__init__(**kwargs)
         self.main = main_window
         self.title(title)
-        self.example_network = "e.g. ((a,(b)#H1), (#H1,c));"
+        self.placeholder = placeholder
         self.protocol("WM_DELETE_WINDOW", self._exit)
+        self.is_network = network
         
-        self.prompt_frame = Frame(self)
-        self.prompt_frame.pack(side="top")
-        prompt_message = Label(self.prompt_frame, text=prompt)
-        prompt_message.pack(pady=(20, 10), padx=20)
+        prompt_frame = Frame(self)
+        prompt_frame.pack(side="top")
+        self.prompt_message = Label(prompt_frame, text=prompt)
+        self.prompt_message.pack(pady=(20, 10), padx=20)
         
         self.text_entry_frame = Frame(self)
-        self.text_entry = TextWithPlaceholder(self.text_entry_frame, self.example_network, height=2, width=40)
-        #self.text_entry = Text(self.text_entry_frame, height=2, width=20)
+        self.text_entry = TextWithPlaceholder(self.text_entry_frame, self.placeholder, height=6, width=40)
         self.text_entry.pack(anchor="c", expand=True, fill="both")
         self.text_entry_frame.pack(padx=(20), pady=(0,20), expand=True, fill="both")
         
@@ -118,34 +160,61 @@ class StringInputPrompt(Toplevel):
         
         self.buttons_frame = Frame(self)
         self.buttons_frame.pack(side="bottom", anchor="c", pady=(10, 20))
-        self.ok_button = Button(self.buttons_frame, text="OK", width=20, command=self._get_input_network)
+        self.ok_button = Button(self.buttons_frame, text="OK", width=20, command=self._get_input)
         self.cancel_button = Button(self.buttons_frame, text="Cancel", width=20, command=self._exit)
         self.ok_button.pack(side="left", padx=(20,10))
         self.cancel_button.pack(side="right", padx=(10,20))
         
+    def change_contents(self, title, prompt, placeholder=""):
+        """
+        Change title, prompt and placeholder text of this dialog
         
-    def _get_input_network(self):
-        """Get network entered"""
+        Parameters
+        ----------
+        title : str
+            Title of prompt window
+            
+        prompt : str
+            Prompt text in dialog window
+            
+        placeholder : str
+            Grey placeholder text in text widget (default = "")
+            
+        """
+        self.title(title)
+        self.prompt_message.configure(text=prompt) 
+        self.text_entry.put_placeholder(placeholder)
+        self.placeholder = placeholder
+        
+        
+    def _get_input(self):
+        """Get network/trees entered"""
         self._clear_error_messages()
         
-        input_network = self.text_entry.get("1.0", "end").strip()
+        input_text = self.text_entry.get("1.0", "end").strip()
         
         try:
-            self.main.generate_network(input_network)
+            if self.is_network:
+                self.main.generate_network(input_text)
+            else:
+                self.main.get_drspr(input_text)
+                
             self._exit()
         
+        
         except MalformedNewickException:
-            print("MalformedNewickException")
-            print("Input not empty check")
-            if not input_network or input_network == self.example_network:
-                
+            if not input_text or input_text == self.placeholder or input_text.count(";") < 2:
+                if self.is_network:
+                    error_text = "Please enter network"
+                else:
+                    error_text = "Please enter at least 2 trees"
+                    
                 Label(self.error_message_frame,
-                      text="Please enter network", fg="red").pack(anchor="c")
+                      text=error_text, fg="red").pack(anchor="c")
                 return
             
             #Check the input
-            print("Input terminates with semicolon")
-            if input_network[-1] != ";":
+            if input_text[-1] != ";":
                 Label(self.error_message_frame,
                       text="String not terminated by semicolon",
                       fg="red").pack(anchor="c")
@@ -154,7 +223,7 @@ class StringInputPrompt(Toplevel):
             opening_brackets = 0
             closing_brackets = 0
             
-            for character in input_network:
+            for character in input_text:
                 if character == "(":
                     opening_brackets += 1
                 elif character == ")":
@@ -174,11 +243,13 @@ class StringInputPrompt(Toplevel):
                 Label(self.error_message_frame,
                       text="Missing brackets", fg="red").pack(anchor="c")
         
+        
         except InvalidLeaves:
-            #No labelled leaves in the entered network
+            #No labelled leaves in the input
             Label(self.error_message_frame,
-                  text="Network must have at least one labelled leaf",
+                  text="Must have at least one labelled leaf",
                   fg="red").pack(anchor="c")
+            
         
     def _clear_error_messages(self):
         """Clear any error messages in dialog"""
@@ -194,3 +265,5 @@ class StringInputPrompt(Toplevel):
         """Hide window"""
         self._clear_error_messages()
         self.withdraw()
+        
+    
