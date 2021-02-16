@@ -1,4 +1,6 @@
-"""Helper module that gets the absolute path to a file"""
+"""
+Helper module that gets the absolute path to a file
+"""
 
 import os
 

@@ -1,4 +1,6 @@
-"""Helper module for constructing gui of application. Defines customised widgets."""
+"""
+Helper module for constructing gui of application. Defines customised widgets.
+"""
 
 from tkinter import (Button, Text, Toplevel, Label)
             

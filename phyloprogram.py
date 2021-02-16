@@ -1,4 +1,6 @@
-"""Main application. Defines the classes and methods of the application gui."""
+"""
+Main application. Defines the classes and methods of the application gui.
+"""
 
 import tkinter as tk
 import tkinter.filedialog
@@ -169,6 +171,9 @@ class Program(Tk):
             num_labelled_leaves = self.network.num_labelled_leaves
             info_text = f"{num_reticulations} reticulations, {num_labelled_leaves} labelled leaves"
             self.info_label["text"] = info_text
+            
+        else:
+            self.info_label["text"] = ""
         
         self.file_label["text"] = filename
     

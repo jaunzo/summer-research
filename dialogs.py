@@ -1,4 +1,6 @@
-"""Module that contains classes for the dialogue boxes"""
+"""
+Module that contains classes for the dialogue boxes
+"""
 
 from tkinter import (Toplevel, Frame, Button, Label, IntVar, Radiobutton)
 from widgets import (TextWithPlaceholder)

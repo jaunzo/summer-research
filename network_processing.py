@@ -1,4 +1,6 @@
-"""Module that handles the generation of trees displayed by input network"""
+"""
+Module that handles the generation of trees displayed by input network
+"""
 
 from phylonetwork import PhylogeneticNetwork
 import matplotlib.pyplot as plt

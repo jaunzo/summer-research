@@ -1,28 +1,8 @@
 """
-Module that runs external executable compiled from cwhidden's rSPR program which calculates rSPR.
+Module that runs external executable compiled from cwhidden's rSPR program which calculates drSPR.
 
 Source code for rspr executable:
 https://github.com/cwhidden/rspr
-
-Copyright 2009-2014 Chris Whidden
-whidden@cs.dal.ca
-http://kiwi.cs.dal.ca/Software/RSPR
-April 29, 2014
-Version 1.2.2
-
-rspr is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-rspr is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with rspr.  If not, see <http://www.gnu.org/licenses/>.
-
 """
 
 import platform
