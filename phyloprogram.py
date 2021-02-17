@@ -733,10 +733,6 @@ class TreesWindow(Window):
         for canvas in self.canvases:
             canvas.get_tk_widget().pack_forget()
             canvas.get_tk_widget().destroy()
-
-            
-#         for widget in self.frame.winfo_children():
-#             widget.destroy()
             
             
     def replace_trees(self, new_trees_obj):
