@@ -126,7 +126,8 @@ class RsprGraph:
         plt.show()
         
         
-    def hamilton(self, G):
+    @staticmethod
+    def hamilton(G):
         F = [(G,[list(G.nodes())[0]])]
         n = G.number_of_nodes()
         while F:
@@ -152,7 +153,7 @@ if __name__ == "__main__":
     trees = []
     trees.append("((1,2),3);")
     trees.append("((1,3),2);")
-    trees.append("(1,(2,3));")
+    trees.append("(1,(2,));")
     
     #f = open("graph1.txt", "r")
     #trees_string = f.read()

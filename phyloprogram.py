@@ -90,8 +90,10 @@ class Program(Tk):
         
         self.file_menu.add_separator()
         
-        self.file_menu.add_command(label="Enter trees", command=self.new_trees, accelerator="Ctrl+T")
-        self.file_menu.add_command(label="Open trees...", command=self.open_trees, accelerator="Ctrl+Shift+O")
+        self.drspr_menu = Menu(self.file_menu, tearoff=0)
+        self.file_menu.add_cascade(label="Calculate drSPR", menu=self.drspr_menu)
+        self.drspr_menu.add_command(label="Enter trees", command=self.new_trees, accelerator="Ctrl+T")
+        self.drspr_menu.add_command(label="Open trees...", command=self.open_trees, accelerator="Ctrl+Shift+O")
         
         self.file_menu.add_separator()
         
