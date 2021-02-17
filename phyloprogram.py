@@ -195,6 +195,11 @@ class Program(Tk):
         """For private use. Show trees button enabled when graphics enabled and calculating drSPR"""
         self.select_leaves_button.config(state = "disabled")
         self.display_trees_button.config(state = "normal")
+        
+    def _disable_tree_tools(self):
+        """For private use. Disable tree buttons in toolbar"""
+        self.select_leaves_button.config(state = "disabled")
+        self.display_trees_button.config(state = "disabled")
     
     def _enable_save(self):
         """For private use. Save functions are enabled when a network and trees has successfully been processed and displayed."""
@@ -473,6 +478,7 @@ class Program(Tk):
             
         else:
             self._enable_text_save()
+            self._disable_tree_tools()
             
             
     def print_drspr(self, trees_array, distances, clusters):
@@ -542,7 +548,6 @@ class Program(Tk):
             if f is None: #if dialog closed with "cancel".
                 return
             
-            
             f.write(file_contents)
             f.close()
         
@@ -563,18 +568,16 @@ class Program(Tk):
             export_path = abs_path + directory 
 
             #Export network
-            if directory is None: #if dialog closed with "cancel".
-                return
+            if directory: #if dialog closed with "cancel".
             
-            if self.network:
-                print("network")
-                self.net_fig.savefig(export_path + "/network.png", bbox_inches="tight")
-            
-            #Export trees
-            count = 1
-            for tree_fig in self.trees.figures:
-                tree_fig.savefig(f"{abs_path}{directory}/trees{str(count)}.png", bbox_inches="tight")
-                count += 1
+                if self.network:
+                    self.net_fig.savefig(export_path + "/network.png", bbox_inches="tight")
+                
+                #Export trees
+                count = 1
+                for tree_fig in self.trees.figures:
+                    tree_fig.savefig(f"{abs_path}{directory}/trees{str(count)}.png", bbox_inches="tight")
+                    count += 1
         
         
     def _exit(self):
