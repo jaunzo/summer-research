@@ -32,7 +32,8 @@ def rspr(tree1, tree2):
     input_string = tree1 + "\n" + tree2
     
     if platform.system() == "Windows":
-        executable = Popen(executable="rspr.exe", args="", stdin=PIPE,
+        file = path.resource_path("rspr.exe")
+        executable = Popen(executable=file, args="", stdin=PIPE,
                                stdout=PIPE, stderr=PIPE,
                                universal_newlines=True, shell=True)
         
@@ -42,8 +43,8 @@ def rspr(tree1, tree2):
         executable.kill()
         
     else:
-        path = path.resource_path("rspr")
-        executable = subprocess.run(path, stdout=PIPE, stderr=PIPE,
+        file = path.resource_path("rspr")
+        executable = subprocess.run(file, stdout=PIPE, stderr=PIPE,
                                     input=input_string.encode("utf-8"),
                                     shell=True)
         
@@ -87,7 +88,11 @@ def rspr_pairwise(trees):
     """
     length = len(trees)
     
+    tree_error_text = "Error with format. Check that tree has correct number of opening and closing brackets and terminates with semicolon."
     trees_array = [None] * length
+    
+    for i, tree_string in enumerate(trees):
+        trees_array[i] = f"t{i+1}:\n{tree_string};\n{tree_error_text}\n"
     
     distance_array = [["-" for i in range(length)] for j in range(length)]
     clusters_array = [["-" for i in range(length)] for j in range(length)]
@@ -100,9 +105,14 @@ def rspr_pairwise(trees):
                 trees_array[i] = t1
                 
                 #Check if leaf set the same
-                t1_leaves = t1.leaves 
-                t2_leaves = t2.leaves
-                if t1_leaves == t2_leaves:
+                t1_leaves = t1.labelled_leaves 
+                t2_leaves = t2.labelled_leaves
+                
+                if t1.has_unlabelled_leaf() or t2.has_unlabelled_leaf():
+                    distance_array[i][j] = "X"
+                    clusters_array[i][j] = ["Error occured. Tree(s) contain unlabelled leaves. Make sure all leaves are labelled."]
+
+                elif t1_leaves == t2_leaves:
                     (distance, clusters) = rspr(t1.eNewick(), t2.eNewick())
                     distance_array[i][j] = distance
                     clusters_array[i][j] = clusters
@@ -110,7 +120,7 @@ def rspr_pairwise(trees):
                 else:
                     missing_leaves = (t1_leaves.difference(t2_leaves)).union(t2_leaves.difference(t1_leaves))
                     distance_array[i][j] = "X"
-                    clusters_array[i][j] = [f"Error occured. Trees don't have same taxa set.  Missing taxa: {', '.join(missing_leaves)}"]
+                    clusters_array[i][j] = [f"Error occured. Trees don't have same taxa set. Missing taxa: {', '.join(missing_leaves)}"]
                 
             except MalformedNewickException:
                 distance_array[i][j] = "X"
@@ -119,46 +129,62 @@ def rspr_pairwise(trees):
             
     return (distance_array, clusters_array, trees_array)
 
-def calculate_drspr(trees_array):
+def calculate_drspr(trees):
     """
     Calculates drSPR. If more than 2 trees are given, distances are calculated pairwise
     
     Parameters
     ----------
     trees_array : list[str]
-        Array of trees in newick format
+        Array of trees in newick format. String of input trees split by semicolon.
         
     Returns
     -------
     tuple[list[str], list[str], Trees]
         Tuple of distance array, clusters array and Trees object
     """
-    length = len(trees_array)
+    length = len(trees)
+    
+    
     
     if length < 2:
         raise MalformedNewickException
     
     elif length == 2:
+        trees_array = [None] * length
+        for i, tree_newick in enumerate(trees):
+            trees_array[i] = f"t{i+1}:\n{tree_newick};"
+        
         for i in range(len(trees_array)):
             try:
-                trees_array[i] = Tree(trees_array[i] + ";", f"t{i+1}") 
+                trees_array[i] = Tree(trees[i] + ";", f"t{i+1}")
                 
             except MalformedNewickException as e:
-                trees_array[i] = None
+                trees_array[i] = f"{trees_array[i]}\nError with format. Check that tree has correct number of opening and closing brackets and terminates with semicolon.\n"
                 distances = ["X"]
-                clusters = [f"Error occured. Check newick string of t{i+1}"]
-                return (distances, clusters, Trees(trees_array))
+                clusters = [f"Error occured. Check tree newick strings."]
+                #return (distances, clusters, Trees(trees_array))
         
-        t1_leaves = trees_array[0].leaves
-        t2_leaves = trees_array[1].leaves
-        if t1_leaves == t2_leaves:
-            (distances, clusters) = rspr(trees_array[0].eNewick(), trees_array[1].eNewick())
-        else:
-            missing_leaves = (t1_leaves.difference(t2_leaves)).union(t2_leaves.difference(t1_leaves))
-            return ("X", f"Error occured. Trees don't have same taxa set. Missing taxa: {', '.join(missing_leaves)}", trees_array)
+        try:
+            t1_leaves = trees_array[0].labelled_leaves
+            t2_leaves = trees_array[1].labelled_leaves
+            t1_unlabelled_leaves = trees_array[0].has_unlabelled_leaf()
+            t2_unlabelled_leaves = trees_array[1].has_unlabelled_leaf()
             
+            if t1_unlabelled_leaves or t2_unlabelled_leaves:
+                return(["X"], ["Error occured. Tree(s) contain unlabelled leaves. Make sure all leaves are labelled."], Trees(trees_array))
+                
+            elif t1_leaves == t2_leaves:
+                (distances, clusters) = rspr(trees_array[0].eNewick(), trees_array[1].eNewick())
+            
+            else:
+                missing_leaves = (t1_leaves.difference(t2_leaves)).union(t2_leaves.difference(t1_leaves))
+                return (["X"], [f"Error occured. Trees don't have same taxa set. Missing taxa: {', '.join(missing_leaves)}"], Trees(trees_array))
+                
+        except AttributeError:
+            return (distances, clusters, Trees(trees_array))
     else:
-        (distances, clusters, trees_array) = rspr_pairwise(trees_array)
+        (distances, clusters, trees_array) = rspr_pairwise(trees)
         
     trees_obj = Trees(trees_array)
     
@@ -180,16 +206,17 @@ class Tree(PhylogeneticNetwork):
         """
         super().__init__(tree)
         self.id = number
+        self.text = f"{self.id}:\n{tree}\n"
         
     @property
-    def leaves(self):
+    def labelled_leaves(self):
         """
         Returns
         -------
         set(str)
             Set of labelled leaves in tree
         """
-        leaves = super().leaves
+        leaves = self.leaves
         labelled_leaves = set()
         
         labels_dict = self.labeling_dict
@@ -200,6 +227,24 @@ class Tree(PhylogeneticNetwork):
             
         return labelled_leaves
 
+    def has_unlabelled_leaf(self):
+        """
+        Check if tree has unlabelled leaf. rspr program crashes when given an input tree with unlabelled
+        leaves.
+        
+        Returns
+        -------
+        bool
+            Returns true if tree has unlabelled leaf
+        """
+        leaves = self.leaves
+        
+        for leaf in leaves:
+            if not self.is_labeled(leaf):
+                self.text += "Error occured. Tree contains 1 or more unlabelled leaves. Make sure all leaves are labelled.\n"
+                return True
+        
+        return False
 
 
 class Trees:
@@ -252,7 +297,7 @@ class Trees:
                 self.figures.append(figure)
                 
                 
-            if tree:
+            if type(tree) != str:
                 tree_ax = figure.add_subplot(rows, cols, plot_number + 1)
                 tree_ax.title.set_text(f"t{i+1}")
                 
@@ -265,20 +310,24 @@ class Trees:
     
 if __name__ == "__main__":
     trees = []
-    trees.append("(((((((1,9),2),((13,3),8)),12),15),(((((14,6),4),7),11),10)),5)")
-    trees.append("((((((((((14,6),4),7),11),(1,9)),2),((13,3),8)),15),(10,12)),5)")
-    trees.append("(((((((14,6),4),7),11),(10,12)),((((1,9),2),((13,3),8)),15)),5)")
-    trees.append("((((((((((14,6),4),7),11),((1,5),9)),2),((13,3),8)),12),15),10)")
-    trees.append("(((((((1,5),9),2),((13,3),8)),12),15),(((((14,6),4),7),11),10))")
-#     trees.append("(((1,2),3),4)")
-#     trees.append("(((1,4),2),3)")
+#     trees.append("(((((((1,9),2),((13,3),8)),12),15),(((((14,6),4),7),11),10)),")
+#     trees.append("((((((((((14,6),4),7),11),(1,9)),2),((13,3),8)),15),(10,12)),5)")
+#     trees.append("(((((((14,6),4),7),11),(10,12)),((((1,9),2),((13,3),8)),15)),5)")
+#     trees.append("((((((((((14,6),4),7),11),((1,5),9)),2),((13,3),8)),12),15),10)")
+#     trees.append("(((((((1,5),9),2),((13,3),8)),12),15),(((((14,6),4),7),11),10))")
+    trees.append("(((1,2),3),4)")
+    trees.append("(((1,4),2),)")
     
     (distances, clusters, trees_obj) = calculate_drspr(trees)
     length = len(distances)
     
     print("TREES")
-    for i, tree in enumerate(trees, start=1):
-        print(f"t{i}:\n{tree}\n")
+    
+    for tree in trees_obj.trees:
+        try:
+            print(f"{tree.text}")
+        except AttributeError:
+            print(f"{tree}")
 
     if length == 1:
         print(f"drSPR = {distances[0]}")

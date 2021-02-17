@@ -142,7 +142,7 @@ class Program(Tk):
         graphics_check_box = Checkbutton(self.toolbar, text = "Enable graphics",
                                               variable=self.graphics_enabled, command=self.set_graphics)
         graphics_check_box.pack(side="right", padx=(0,10))
-        ToolTip(graphics_check_box, "Enable graph visualisation for the next entered network")
+        ToolTip(graphics_check_box, "Enable graph visualisation for the next entered network/trees")
         
     
     def _initialise_info_bar(self):
@@ -487,8 +487,8 @@ class Program(Tk):
         
         Parameters
         ----------
-        trees_array : list[PhylogeneticNetwork]
-            Array of PhylogeneticNetwork objects
+        trees_array : list[str, PhylogeneticNetwork]
+            Array of str or PhylogeneticNetwork objects
             
         distances : list[str]
             Array of distances
@@ -500,8 +500,15 @@ class Program(Tk):
         self.main_text_widget.delete('1.0', "end")
         
         self.main_text_widget.insert("end", "TREES:\n")
-        for i, tree in enumerate(trees_array, start=1):
-            self.main_text_widget.insert("end", f"t{i}:\n{tree}\n\n")
+        text = ""
+
+        for tree in trees_array:
+            if type(tree) != str:
+                text += f"{tree.text}\n"
+            else:
+                text += f"{tree}\n"
+        
+        self.main_text_widget.insert("end", text)
         
         length = len(distances)
 
