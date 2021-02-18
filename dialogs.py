@@ -118,7 +118,7 @@ class MultiChoicePrompt(Toplevel):
 
 class StringInputPrompt(Toplevel):
     """Class for prompt dialog that asks for string input"""
-    def __init__(self, main_window, title, prompt, placeholder="", network=True, **kwargs):
+    def __init__(self, main_window, title, prompt, placeholder="", operation="Network", **kwargs):
         """
         Parameters
         ----------
@@ -143,7 +143,8 @@ class StringInputPrompt(Toplevel):
         self.title(title)
         self.placeholder = placeholder
         self.protocol("WM_DELETE_WINDOW", self._exit)
-        self.is_network = network
+        #self.is_network = network
+        self.operation = operation
         
         prompt_frame = Frame(self)
         prompt_frame.pack(side="top")
@@ -194,9 +195,9 @@ class StringInputPrompt(Toplevel):
         input_text = self.text_entry.get("1.0", "end").strip()
         
         try:
-            if self.is_network:
+            if self.operation == "Network":
                 self.main.generate_network(input_text)
-            else:
+            elif self.operation == "Calculate drSPR":
                 self.main.get_drspr(input_text)
                 
             self._exit()

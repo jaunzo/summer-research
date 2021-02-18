@@ -37,7 +37,7 @@ class Program(Tk):
         self.net_directory = ""
         self.trees_directory = ""
         self.net_fig = None
-        self.trees_window = None
+        self.graph_window = None
         
         self.title("PhyloProgram")
         
@@ -87,6 +87,14 @@ class Program(Tk):
         
         self.file_menu.add_command(label="Enter network", command=self.new_network, accelerator="Ctrl+N")
         self.file_menu.add_command(label="Open network...", command=self.open_network, accelerator="Ctrl+O")
+        
+        
+        self.file_menu.add_separator()
+        
+        self.drspr_menu = Menu(self.file_menu, tearoff=0)
+        self.file_menu.add_cascade(label="Calculate drSPR", menu=self.drspr_menu)
+        self.drspr_menu.add_command(label="Enter trees", command=lambda: self.new_trees("Calculate drSPR"), accelerator="Ctrl+T")
+        self.drspr_menu.add_command(label="Open trees...", command=lambda: self.open_trees("Calculate drSPR"), accelerator="Ctrl+Shift+O")
         
         self.file_menu.add_separator()
         
@@ -342,9 +350,9 @@ class Program(Tk):
             
     def print_network(self):
         """Print out the network in main window. Hide tree window"""
-        if self.trees_window:
-            self.trees_window.destroy()
-            self.trees_window = None
+        if self.graph_window:
+            self.graph_window.destroy()
+            self.graph_window = None
         
         self.main_text_widget.config(state="normal")
         self.main_text_widget.delete('1.0', "end")
@@ -354,8 +362,8 @@ class Program(Tk):
         
     def display_network(self):
         """Display input network in the main window."""
-        if self.trees_window:
-            self.trees_window.withdraw()
+        if self.graph_window:
+            self.graph_window.withdraw()
             
         self.net_fig.gca().clear()
         
@@ -381,12 +389,12 @@ class Program(Tk):
             
             if self.network.graphics:
                 self.trees.draw()
-                self.display_trees()
+                self.display_trees(embedded_trees=True)
             else:
                 self.print_trees()
                 
         elif self.graphics:
-            self.display_trees(embedded_trees=False)
+            self.display_trees()
         
         
     def print_trees(self):
@@ -404,12 +412,12 @@ class Program(Tk):
         Displays trees in a window when user clicks "Show trees" or selects leaves. Only one trees window is
         displayed at a time
         """
-        if self.trees_window:
-            self.trees_window.deiconify()
-            self.trees_window.replace_trees(self.trees)
+        if self.graph_window:
+            self.graph_window.deiconify()
+            self.graph_window.replace_trees(self.trees)
         else:
             #Create window
-            self.trees_window = TreesWindow(self, self.trees, width=self.scaled_width, height=self.scaled_height, title="Trees", **kwargs)            
+            self.graph_window = GraphWindow(self, self.trees, width=self.scaled_width, height=self.scaled_height, title="Trees", **kwargs)            
         
         self._enable_save()
     
@@ -420,7 +428,7 @@ class Program(Tk):
             self.input_prompt.update()
             self.input_prompt.deiconify()
         else:
-            self.input_prompt = StringInputPrompt(self, f"{rspr_operation}: Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);", False)
+            self.input_prompt = StringInputPrompt(self, f"{rspr_operation}: Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);", "Calculate drSPR")
 
     
     def open_trees(self, rspr_operation):
@@ -436,7 +444,7 @@ class Program(Tk):
             f = open(filename, "r")
             text = f.read().strip()
             
-            if text != None:
+            if text != None and rspr_operation == "Calculate drSPR":
                 try:
                     self.get_drspr(text, text_file)
                 except MalformedNewickException:
@@ -456,8 +464,8 @@ class Program(Tk):
         filename : str, optional
             Filename of trees text file opened (default="")
         """
-        if self.trees_window:
-            self.trees_window.withdraw()
+        if self.graph_window:
+            self.graph_window.withdraw()
             
         self.network = None
         input_trees = input_trees.translate(str.maketrans('', '', ' \n\t\r'))
@@ -666,9 +674,9 @@ class Window(Toplevel):
         self.top_canvas.configure(scrollregion=self.top_canvas.bbox("all"))
 
         
-class TreesWindow(Window):
+class GraphWindow(Window):
     """Class for window that displays visualisation of trees."""
-    def __init__(self, main_window, trees_obj, embedded_trees=True, **kwargs):
+    def __init__(self, main_window, trees_obj, embedded_trees=False, **kwargs):
         """
         Parameters
         ----------
@@ -731,7 +739,7 @@ class TreesWindow(Window):
         self.info_label.pack(anchor="c")
             
     def clear_figures(self):
-        """Remove the figures currently displayed in the TreesWindow."""
+        """Remove the figures currently displayed in the GraphWindow."""
         for canvas in self.canvases:
             canvas.get_tk_widget().pack_forget()
             canvas.get_tk_widget().destroy()
@@ -750,6 +758,7 @@ class TreesWindow(Window):
             self.clear_figures()
             self.trees_obj = new_trees_obj
             self.display_figures()
+        
         
         
     def _exit(self):
