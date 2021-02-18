@@ -69,8 +69,8 @@ class MultiChoicePrompt(Toplevel):
         self.error_message_frame = Frame(self)
         self.error_message_frame.pack(anchor="c", fill="x")
 
-        self.ok_button = Button(self, text="OK", width=20, command=self._get_input_leaves)
-        self.ok_button.pack(pady=(20, 20))
+        ok_button = Button(self, text="OK", width=20, command=self._get_input_leaves)
+        ok_button.pack(pady=(20, 20))
         
     def _text_focus_off(self, *_):
         """Removes focus from the TextWithPlaceholder object."""
@@ -82,6 +82,8 @@ class MultiChoicePrompt(Toplevel):
         
     def _get_input_leaves(self):
         """Get the input leaves from the text field."""
+        self._clear_error_messages()
+        
         if self.v.get() == 0:
             input_leaves = self.main.network.labelled_leaves
         else:
@@ -92,7 +94,7 @@ class MultiChoicePrompt(Toplevel):
                 raise InvalidLeaves
             
             self.main.network.set_current_selected_leaves(input_leaves)
-            self.main.generate_trees()
+            self.main.generate_trees_graph()
             self._exit()
             
         except InvalidLeaves as e:
@@ -161,10 +163,10 @@ class StringInputPrompt(Toplevel):
         
         self.buttons_frame = Frame(self)
         self.buttons_frame.pack(side="bottom", anchor="c", pady=(10, 20))
-        self.ok_button = Button(self.buttons_frame, text="OK", width=20, command=self._get_input)
-        self.cancel_button = Button(self.buttons_frame, text="Cancel", width=20, command=self._exit)
-        self.ok_button.pack(side="left", padx=(20,10))
-        self.cancel_button.pack(side="right", padx=(10,20))
+        ok_button = Button(self.buttons_frame, text="OK", width=20, command=self._get_input)
+        cancel_button = Button(self.buttons_frame, text="Cancel", width=20, command=self._exit)
+        ok_button.pack(side="left", padx=(20,10))
+        cancel_button.pack(side="right", padx=(10,20))
         
     def change_contents(self, title, prompt, placeholder=""):
         """

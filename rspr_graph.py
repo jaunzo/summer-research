@@ -9,6 +9,7 @@ import path
 from subprocess import PIPE, Popen
 import networkx as nx
 import matplotlib.pyplot as plt
+from phylonetwork import MalformedNewickException, PhylogeneticNetwork
     
 class RsprGraph:
     """Class for creating rspr graph"""
@@ -19,15 +20,37 @@ class RsprGraph:
         trees_string : str
             String of all tree newick strings, each terminated by semicolon.
         """
-        self.spr_dense_graph(trees_string)
-        input_trees = trees_string.translate(str.maketrans('', '', ' \n\t\r'))
-        self.trees_array = input_trees.split(";")
+        self.check_validity(trees_string)
+        self.spr_dense_graph()
         
         self.figures = []
-        
-        if not self.trees_array[-1]:
-            self.trees_array.pop()
         self.create_graph()
+        
+    def check_validity(self, trees_string):
+        """
+        Check that each tree is valid and filters out invalid trees
+        
+        Parameters
+        ----------
+        trees_string : str
+            String of all tree newick strings, each terminated by semicolon.
+        """
+        input_trees = trees_string.translate(str.maketrans('', '', ' \n\t\r'))
+        trees_array = input_trees.split(";")
+        
+        if not trees_array[-1]:
+            trees_array.pop()
+        
+        self.tree_label_dict = {}
+        self.valid_trees = []
+        
+        for i, tree in enumerate(trees_array, start=1):
+            try:
+                PhylogeneticNetwork(tree+";")
+                self.tree_label_dict[f"{tree};"] = f"t{i}"
+                self.valid_trees.append(f"{tree};")
+            except MalformedNewickException:
+                self.tree_label_dict[f"{tree};"] = f"t{i}"
     
     @property
     def text(self):
@@ -37,19 +60,25 @@ class RsprGraph:
         Returns
         -------
         str
-            Text representation of all trees.
+            Text representation of graph.
         """
+        error_message = "Error with tree format, tree has been excluded from the graph. "
+        error_message += "Check that tree has correct number of opening and "
+        error_message += "closing brackets and terminates with semicolon.\n"
         text = ""
-        for i, tree in enumerate(self.trees_array, start=1):
-            text += f"t{i}:\n{tree};\n\n"
-            
+        
+        #Printing out input trees
+        for tree, label in self.tree_label_dict.items():
+            if tree in self.valid_trees:
+                text += f"{label}:\n{tree}\n\n"
+            else:
+                text += f"{label}:\n{tree}\n{error_message}\n"
 
         number_nodes = self.graph.number_of_nodes()
         first_vertex = list(self.graph.nodes())[0]
         hamilton_path = RsprGraph.hamiltonian_cycle(self.graph, first_vertex, (), first_vertex, number_nodes)
             
-            
-        #hamilton_path = self.hamiltonian_cycle(self.graph)
+
         if hamilton_path:
             hamilton_cycle = f"Yes\n{' -> '.join(hamilton_path)}\n"
         else:
@@ -65,15 +94,12 @@ class RsprGraph:
         return text
         
 
-    def spr_dense_graph(self, trees_string):
-        """
-        Gets neighbours of a single tree
+    def spr_dense_graph(self):
+        """Gets neighbours of a single tree"""
+        trees_string = ""
+        for tree in self.valid_trees:
+            trees_string += f"{tree}\n"
         
-        Parameters
-        ----------
-        trees_string : str
-            String of all tree newick strings, each terminated by semicolon.
-        """
         if platform.system() == "Windows":
             file = path.resource_path("spr_dense_graph.exe")
             executable = Popen(executable=file, args="", stdin=PIPE,
@@ -105,10 +131,17 @@ class RsprGraph:
         lines_array = out.split()
         self.adjacency_dict = {}
         
-        for line in lines_array:
+        for i, line in enumerate(lines_array):
             array = line.split(",")
-            node = f"t{int(array[0])+1}"
-            neighbour = f"t{int(array[1])+1}"
+            
+            node_index = int(array[0])
+            neighbour_index = int(array[1])
+            
+            node_tree = self.valid_trees[node_index]
+            neighbour_tree = self.valid_trees[neighbour_index]
+            
+            node = self.tree_label_dict[node_tree]
+            neighbour = self.tree_label_dict[neighbour_tree]
             
             if node in self.adjacency_dict:
                 self.adjacency_dict[node].append(neighbour)
@@ -120,15 +153,16 @@ class RsprGraph:
         """Create graph using networkx"""
         self.graph = nx.Graph()
         
-        length = len(self.trees_array)
+        length = len(self.valid_trees)
         
-        for i, tree in enumerate(self.trees_array, start=1):
-            self.graph.add_node(f"t{i}")
+        for tree in self.valid_trees:
+            node = self.tree_label_dict[tree]
+            self.graph.add_node(node)
         
         for node, neighbor_array in self.adjacency_dict.items():
             for neighbor in neighbor_array:
                 self.graph.add_edge(node, neighbor)
-            
+
             
     def draw(self):
         """Draw graph on figure"""
@@ -189,7 +223,7 @@ if __name__ == "__main__":
     trees.append("(1,(2,3));")
     trees_str = "\n".join(trees)
     
-    f = open("20.txt", "r")
+    f = open("4trees_invalid.txt", "r")
     trees_string = f.read()
     
     rspr_graph = RsprGraph(trees_string)

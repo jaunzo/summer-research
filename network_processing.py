@@ -48,8 +48,10 @@ class Network:
         graphics : bool
             Logic to enable/disable graph drawing
         """
+        #Original network unchanged while current network will be suppressed
         self._original_network = PhylogeneticNetwork(eNewick=network_newick)
-        self._current_network = copy.deepcopy(self._original_network)
+        self._current_network = PhylogeneticNetwork(eNewick=network_newick)
+        self._current_network.remove_elementary_nodes()
         
         self._newick = network_newick
         self.figure = network_figure
@@ -64,7 +66,7 @@ class Network:
         self.trees_dict = {} #Dictionary that stores the selected leaves and corresponding generated Trees object
 
         
-    @cached_property
+    @property
     def num_reticulations(self):
         """
         Number of reticulations in input network
@@ -76,7 +78,7 @@ class Network:
         """
         return len(self._original_network.reticulations)
         
-    @cached_property
+    @property
     def num_labelled_leaves(self):
         """
         Number of labelled leaves in input network
@@ -290,8 +292,6 @@ class EmbeddedTrees:
         self.network = network
         self._selected_leaves = leaves
         
-    
-        
     @property
     def num_unique_trees(self):
         """
@@ -424,14 +424,13 @@ class EmbeddedTrees:
         for leaf in leaves:
             if not tree.is_labeled(leaf):
                 unlabelled_leaves.add(leaf)
-         
-         #Removing any dummy leaves that may occur when removing reticulation arcs in the network
+        
+        #Removing any dummy leaves that may occur when removing reticulation arcs in the network
         for leaf in unlabelled_leaves:
             tree.remove_node_and_reconnect(leaf)
             
         tree.clear_cache()
         tree.remove_elementary_nodes()
-        #return unlabelled_leaves
         
     def draw(self, close_figs=True):
         """

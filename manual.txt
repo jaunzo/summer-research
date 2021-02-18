@@ -1,14 +1,20 @@
+=================================================================================
 User Manual (Version 2.0)
 
-------------------------------------------------------------------------------
-File Menu:
+=================================================================================
+FILE MENU
 
+=================================================================================
+TREES EMBEDDED IN NETWORK
+
+-------------------------------
 File -> Enter network (Ctrl+N):
 -------------------------------
 Enter in a network in extended Newick format. Network string must contain at 
 least one labelled leaf and must end with semicolon.
 
 
+---------------------------------
 File -> Open network... (Ctrl+O):
 ---------------------------------
 Opens a text file which contains a network in extended Newick format. Network 
@@ -16,52 +22,88 @@ string must contain at least one labelled leaf and must end with semicolon.
 Text file must only contain ONE network.
 
 
-File -> Enter trees (Ctrl+T):
------------------------------
+This can draw trees of networks that have less than 7 reticulations and/or 
+10 leaves. Run this function without graph visualisation if the input 
+network contains less than 10 reticulations and/or 15-20 leaves. However, this 
+depends on computer specs.
+
+
+=================================================================================
+RSPR GRAPH
+
+--------------------------------------------------
+File -> Create rSPR graph -> Enter trees (Ctrl+G):
+--------------------------------------------------
+Enter in at least 2 trees in newick format to create rSPR graph. Each tree must 
+terminate with a semicolon.
+
+
+----------------------------------------------------------
+File -> Create rSPR graph -> Open trees... (Ctrl+Shift+D):
+----------------------------------------------------------
+Opens a text file which contains at least 2 trees in newick format to create
+rSPR graph. Each tree must terminate with a semicolon.
+
+
+=================================================================================
+DRSPR
+
+------------------------------------------------
+File -> Calculate drSPR -> Enter trees (Ctrl+D):
+------------------------------------------------
 Enter in at least 2 trees in newick format to calculate drSPR. Each tree must 
 terminate with a semicolon.
 
 
-File -> Open trees... (Ctrl+Shift+O):
+-------------------------------------
+File -> Open trees... (Ctrl+Shift+D):
 -------------------------------------
 Opens a text file which contains at least 2 trees in newick format to calculate
 drSPR. Each tree must terminate with a semicolon.
 
 
+This function can handle up to 20 trees at a time with each tree having around 
+20 leaves. This may vary depending on computer specs.
+
+
+=================================================================================
+SAVING
+
+-----------------------------------------------
 File -> Save as... -> Text file (Ctrl+Shift+T):
 -----------------------------------------------
 Saves the network and trees represented in Newick format in a text file.
 
 
+--------------------------------------------
 File -> Save as... -> Images (Ctrl+Shift+I):
 --------------------------------------------
 Saves the network and tree graphs as a series of images in selected folder.
 
 
-------------------------------------------------------------------------------
-Toolbar:
+=================================================================================
+TOOLBAR
 
+--------------
 Select leaves:
 --------------
 Generates trees displayed by the network that only contains the entered list 
 of leaves.
 
 
-Show trees:
------------
-Opens a window that shows all unique trees with the number of occurences 
-displayed above each tree when generating all embedded trees from a network. 
-By default, trees are displayed with all labelled leaves.
+-----------------
+Draw trees/graph:
+-----------------
+Enabled when graphics is enabled.
 
 When calculating drSPR, this opens a window that visualises all entered valid 
 trees with tree number displayed above each tree if graphics is enabled.
 
 
+----------------
 Enable graphics:
 ----------------
 Enabled: Network and trees will be drawn as graphs. Graphviz must be installed.
 Disabled: Network and trees will be printed as text on the main window.
 
-This program can draw trees of networks that have less than 7 reticulations 
-and/or 10 leaves. Run the program without graph visualisation if the input 
-network contains less than 10 reticulations and/or 15-20 leaves.
+=================================================================================

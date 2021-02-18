@@ -84,40 +84,38 @@ class Program(Tk):
         """For private use. Initialise the top menu bar and bind shortcuts"""
         menu_bar = Menu(self)
         
-        self.file_menu = Menu(menu_bar, tearoff=0)
+        file_menu = Menu(menu_bar, tearoff=0)
         
-        self.file_menu.add_command(label="Enter network", command=self.new_network, accelerator="Ctrl+N")
-        self.file_menu.add_command(label="Open network...", command=self.open_network, accelerator="Ctrl+O")
+        file_menu.add_command(label="Enter network", command=self.new_network, accelerator="Ctrl+N")
+        file_menu.add_command(label="Open network...", command=self.open_network, accelerator="Ctrl+O")
         
+        file_menu.add_separator()
         
-        self.file_menu.add_separator()
+        #drSPR sub menu
+        rspr_graph_menu = Menu(file_menu, tearoff=0)
+        file_menu.add_cascade(label="Create rSPR graph", menu=rspr_graph_menu)
+        rspr_graph_menu.add_command(label="Enter trees", command=lambda: self.new_trees("Create rSPR graph"), accelerator="Ctrl+G")
+        rspr_graph_menu.add_command(label="Open trees...", command=lambda: self.open_trees("Create rSPR graph"), accelerator="Ctrl+Shift+G")
         
-        self.drspr_menu = Menu(self.file_menu, tearoff=0)
-        self.file_menu.add_cascade(label="Create rSPR graph", menu=self.drspr_menu)
-        self.drspr_menu.add_command(label="Enter trees", command=lambda: self.new_trees("Create rSPR graph"), accelerator="Ctrl+G")
-        self.drspr_menu.add_command(label="Open trees...", command=lambda: self.open_trees("Create rSPR graph"), accelerator="Ctrl+Shift+G")
+        drspr_menu = Menu(file_menu, tearoff=0)
+        file_menu.add_cascade(label="Calculate drSPR", menu=drspr_menu)
+        drspr_menu.add_command(label="Enter trees", command=lambda: self.new_trees("Calculate drSPR"), accelerator="Ctrl+D")
+        drspr_menu.add_command(label="Open trees...", command=lambda: self.open_trees("Calculate drSPR"), accelerator="Ctrl+Shift+D")
         
-        self.file_menu.add_separator()
+        file_menu.add_separator()
         
-        self.drspr_menu = Menu(self.file_menu, tearoff=0)
-        self.file_menu.add_cascade(label="Calculate drSPR", menu=self.drspr_menu)
-        self.drspr_menu.add_command(label="Enter trees", command=lambda: self.new_trees("Calculate drSPR"), accelerator="Ctrl+D")
-        self.drspr_menu.add_command(label="Open trees...", command=lambda: self.open_trees("Calculate drSPR"), accelerator="Ctrl+Shift+D")
-        
-        self.file_menu.add_separator()
-        
-        self.save_sub_menu = Menu(self.file_menu, tearoff=0)
+        self.save_sub_menu = Menu(file_menu, tearoff=0)
         self.save_sub_menu.add_command(label="Text file", command=self.save_text, accelerator="Ctrl+Shift+T")
         self.save_sub_menu.add_command(label="Images", command=self.save_image, accelerator="Ctrl+Shift+I")
-        self.file_menu.add_cascade(label="Save as...", menu=self.save_sub_menu)
+        file_menu.add_cascade(label="Save as...", menu=self.save_sub_menu)
         self.save_sub_menu.entryconfigure("Text file", state = "disabled")
         self.save_sub_menu.entryconfigure("Images", state="disabled")
         self.text_save_enabled = False
         self.image_save_enabled = False
         
-        self.file_menu.add_separator()
-        self.file_menu.add_command(label="Exit", command=self._exit)
-        menu_bar.add_cascade(label="File", menu=self.file_menu)
+        file_menu.add_separator()
+        file_menu.add_command(label="Exit", command=self._exit)
+        menu_bar.add_cascade(label="File", menu=file_menu)
         
         help_menu = Menu(menu_bar, tearoff=0)
         help_menu.add_command(label="About", command=self.about)
@@ -146,9 +144,9 @@ class Program(Tk):
                                          command=self._select_leaves, state="disabled",
                                                 tooltip_text="Enter set leaves to be displayed in trees. By default, all labelled leaves in network are selected")
         
-        self.display_trees_button = HoverButton(self.toolbar, text ="Show trees", relief="raised",
-                                                command=self.generate_trees, state="disabled",
-                                                tooltip_text="Generate trees with currently selected leaves or show trees when calculating drSPR")
+        self.draw_button = HoverButton(self.toolbar, text ="Draw trees/graph", relief="raised",
+                                                command=self.generate_trees_graph, state="disabled",
+                                                tooltip_text="Draw trees or graph")
         
         self.graphics_enabled = IntVar()
         self.graphics = False
@@ -202,17 +200,22 @@ class Program(Tk):
     def _enable_tree_tools(self):
         """For private use. Buttons involving trees are enabled when a network has successfully been processed and displayed."""
         self.select_leaves_button.config(state = "normal")
-        self.display_trees_button.config(state = "normal")
+        self.draw_button.config(state = "normal")
         
     def _enable_tree_display(self):
-        """For private use. Show trees button enabled when graphics enabled and calculating drSPR"""
+        """For private use. Draw button enabled when graphics enabled"""
         self.select_leaves_button.config(state = "disabled")
-        self.display_trees_button.config(state = "normal")
+        self.draw_button.config(state = "normal")
         
     def _disable_tree_tools(self):
         """For private use. Disable tree buttons in toolbar"""
         self.select_leaves_button.config(state = "disabled")
-        self.display_trees_button.config(state = "disabled")
+        self.draw_button.config(state = "disabled")
+        
+    def _enable_select_leaves(self):
+        """For private use. Enable select leaves button and disable draw button in toolbar"""
+        self.select_leaves_button.config(state = "normal")
+        self.draw_button.config(state = "disabled")
     
     def _enable_save(self):
         """For private use. Save functions are enabled when a network and trees has successfully been processed and displayed."""
@@ -342,14 +345,16 @@ class Program(Tk):
         """
         self.network = Network(net_newick, self.net_fig, self.graphics)
         self._update_info_bar(filename)
-        self._enable_tree_tools()
+        
         self.net_newick = net_newick
         
         if self.graphics:
+            self._enable_tree_tools()
             self.main_text_widget.pack_forget()
             self.net_canvas.get_tk_widget().pack(side="top", fill="both", expand=1)
             self.display_network()
         else:
+            self._enable_select_leaves()
             self.net_canvas.get_tk_widget().pack_forget()
             self.main_text_widget.pack(expand=True, fill="both")
             self.print_network()
@@ -364,6 +369,7 @@ class Program(Tk):
         self.main_text_widget.config(state="normal")
         self.main_text_widget.delete('1.0', "end")
         self.main_text_widget.insert("1.0", self.network.text)
+        self.main_text_widget.insert("end", "\n\nSelect leaves to generate embedded trees.")
         self.main_text_widget.config(state="disabled")
         
         
@@ -388,20 +394,21 @@ class Program(Tk):
             self.graphics = False
         
         
-    def generate_trees(self):
-        """Generate the tree objects and display them depending on graphics mode."""
+    def generate_trees_graph(self):
+        """Generate the tree/graph object and display them depending on graphics mode."""
         #Get Trees object
         if self.network:
             self.graph_trees = self.network.process()
+            self.graph_trees.draw()
             
             if self.network.graphics:
                 self.graph_trees.draw()
-                self.display_trees()
+                #self.display_trees_graph()
             else:
                 self.print_trees()
                 
-        elif self.graphics:
-            self.display_trees()
+        if self.graphics:
+            self.display_trees_graph()
         
         
     def print_trees(self):
@@ -414,7 +421,7 @@ class Program(Tk):
         
         self._enable_text_save()
     
-    def display_trees(self, **kwargs):
+    def display_trees_graph(self, **kwargs):
         """
         Displays trees in a window when user clicks "Show trees" or selects leaves. Only one trees window is
         displayed at a time
@@ -428,23 +435,37 @@ class Program(Tk):
         
         self._enable_save()
     
-    def new_trees(self, rspr_operation):
-        """Displays dialog and gets at least 2 trees in newick format inputted by the user"""
-        self.operation = rspr_operation
+    def new_trees(self, operation):
+        """
+        Displays dialog and gets at least 2 trees in newick format inputted by the user
+        
+        Parameters
+        ----------
+        operation : str
+            Specifies whether program is running rspr graph or drspr
+        """
+        self.operation = operation
         
         if self.input_prompt:
-            self.input_prompt.change_contents(f"{rspr_operation}: Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);")
+            self.input_prompt.change_contents(f"{self.operation}: Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);")
             self.input_prompt.update()
             self.input_prompt.deiconify()
         else:
             self.input_prompt = StringInputPrompt(self, f"{rspr_operation}: Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);", self.operation)
 
     
-    def open_trees(self, rspr_operation):
-        """Opens file that contains at least 2 trees in newick format"""
-        self.operation = rspr_operation
+    def open_trees(self, operation):
+        """
+        Opens file that contains at least 2 trees in newick format
         
-        filename =  tkinter.filedialog.askopenfilename(initialdir = self.trees_directory, title = f"{rspr_operation}: Open trees...",
+        Parameters
+        ----------
+        operation : str
+            Specifies whether program is running rspr graph or drspr
+        """
+        self.operation = operation
+        
+        filename =  tkinter.filedialog.askopenfilename(initialdir = self.trees_directory, title = f"{self.operation}: Open trees...",
                                                        filetypes = (("text files","*.txt"),("all files","*.*")))
 
         path = os.path.split(filename)
@@ -470,7 +491,7 @@ class Program(Tk):
         
         Parameters
         ----------
-        input_trees : str
+        input_trees_string : str
             String containing at least 2 trees in newick format delimited by semicolon
             
         filename : str, optional
@@ -729,7 +750,7 @@ class Window(Toplevel):
 
         
 class GraphWindow(Window):
-    """Class for window that displays visualisation of trees."""
+    """Class for window that displays visualisation of trees and graphs."""
     def __init__(self, main_window, graph_trees, operation, **kwargs):
         """
         Parameters
@@ -740,8 +761,9 @@ class GraphWindow(Window):
         graph_trees : EmbeddedTrees or Trees or RsprGraph
             Object that contains the tree figures to be displayed
             
-        embedded_trees : bool, optional
-            Logic to tell whether to display additional information associated with embedded trees (default is True)
+        operation : str
+            Specifies what function the program is running (embedded trees,
+            rspr graph or drspr)
         """
         super().__init__(**kwargs)
         self.main = main_window
@@ -813,8 +835,7 @@ class GraphWindow(Window):
             self.graph_trees = new_graph_trees
             self.display_figures()
         
-        
-        
+
     def _exit(self):
         """Hide window"""
         self.withdraw()
