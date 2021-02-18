@@ -23,6 +23,8 @@ class RsprGraph:
         input_trees = trees_string.translate(str.maketrans('', '', ' \n\t\r'))
         self.trees_array = input_trees.split(";")
         
+        self.figures = []
+        
         if not self.trees_array[-1]:
             self.trees_array.pop()
         self.create_graph()
@@ -115,8 +117,7 @@ class RsprGraph:
         
         
     def create_graph(self):
-        """Draw graph using networkx"""
-        self.figure = plt.figure()
+        """Create graph using networkx"""
         self.graph = nx.Graph()
         
         length = len(self.trees_array)
@@ -128,8 +129,12 @@ class RsprGraph:
             for neighbor in neighbor_array:
                 self.graph.add_edge(node, neighbor)
             
-        nx.draw(self.graph, node_color="#57f542", with_labels=True, ax=self.figure.gca())
-        plt.show()
+            
+    def draw(self):
+        """Draw graph on figure"""
+        figure = plt.figure()
+        nx.draw(self.graph, node_color="#57f542", with_labels=True, ax=figure.gca())
+        self.figures = [figure]
     
             
     @staticmethod

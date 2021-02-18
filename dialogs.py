@@ -199,6 +199,8 @@ class StringInputPrompt(Toplevel):
                 self.main.generate_network(input_text)
             elif self.operation == "Calculate drSPR":
                 self.main.get_drspr(input_text)
+            else:
+                self.main.get_rspr_graph(input_text)
                 
             self._exit()
         
