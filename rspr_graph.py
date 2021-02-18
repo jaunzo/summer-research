@@ -41,7 +41,13 @@ class RsprGraph:
         for i, tree in enumerate(self.trees_array, start=1):
             text += f"t{i}:\n{tree};\n\n"
             
-        hamilton_path = self.hamilton(self.graph)
+
+        number_nodes = self.graph.number_of_nodes()
+        first_vertex = list(self.graph.nodes())[0]
+        hamilton_path = RsprGraph.hamiltonian_cycle(self.graph, first_vertex, (), first_vertex, number_nodes)
+            
+            
+        #hamilton_path = self.hamiltonian_cycle(self.graph)
         if hamilton_path:
             hamilton_cycle = f"Yes\n{' -> '.join(hamilton_path)}\n"
         else:
@@ -124,40 +130,91 @@ class RsprGraph:
             
         nx.draw(self.graph, node_color="#57f542", with_labels=True, ax=self.figure.gca())
         plt.show()
-        
-        
+    
+            
     @staticmethod
-    def hamilton(G):
-        F = [(G,[list(G.nodes())[0]])]
-        n = G.number_of_nodes()
-        while F:
-            graph,path = F.pop()
-            confs = []
-            neighbors = (node for node in graph.neighbors(path[-1]) 
-                         if node != path[-1]) #exclude self loops
-            for neighbor in neighbors:
-                conf_p = path[:]
-                conf_p.append(neighbor)
-                conf_g = nx.Graph(graph)
-                conf_g.remove_node(path[-1])
-                confs.append((conf_g,conf_p))
-            for g,p in confs:
-                if len(p)==n:
-                    return p
-                else:
-                    F.append((g,p))
-        return None
+    def hamiltonian_cycle(graph, current_vertex, path, root, num_nodes):
+        """
+        Static class method that finds hamiltonian cycle in a graph
         
+        Parameters
+        ----------
+        graph : Graph
+            Networkx graph
+            
+        current_vertex : str
+            Current vertex in graph traversal
+            
+        path : tuple[str]
+            Contains current path from root to current vertex
+            
+        root : str
+            First vertex where path starts
+            
+        num_nodes : int
+            Number of nodes in graph
+            
+        Returns
+        -------
+        tuple[str]
+            Returns cycle path if there is a hamiltonian cycle, else returns None
+        """
+        path += (current_vertex,)
+        
+        #Base case
+        if len(path)==num_nodes:
+            #If path has all nodes and the last node is adjacent to the root
+            if root in list(graph.neighbors(current_vertex)):
+                return (path + (root,)) #Return cycle path
+        
+        neighbours = graph.neighbors(current_vertex)
+        
+        for neighbour in neighbours:
+            if neighbour not in path:
+                result = RsprGraph.hamiltonian_cycle(graph, neighbour, path, root, num_nodes)
+                if result:
+                    return result
+            
+        return None
 
 if __name__ == "__main__":
     trees = []
     trees.append("((1,2),3);")
     trees.append("((1,3),2);")
-    trees.append("(1,(2,));")
+    trees.append("(1,(2,3));")
+    trees_str = "\n".join(trees)
     
-    #f = open("graph1.txt", "r")
-    #trees_string = f.read()
+    f = open("20.txt", "r")
+    trees_string = f.read()
     
-    rspr_graph = RsprGraph("\n".join(trees))
+    rspr_graph = RsprGraph(trees_string)
     print(rspr_graph.text)
     
+
+
+#     graph = nx.Graph()
+#     
+#     graph.add_node('a')
+#     graph.add_node('b')
+#     graph.add_node('c')
+#     graph.add_node('d')
+#     graph.add_node('e')
+#     graph.add_node('f')
+#     
+#     graph.add_edge('a', 'b')
+#     graph.add_edge('a', 'c')
+#     graph.add_edge('a', 'd')
+#     
+#     graph.add_edge('b', 'c')
+#     graph.add_edge('b', 'e')
+#     
+#     graph.add_edge('c', 'd')
+#     graph.add_edge('c', 'e')
+#     
+#     graph.add_edge('d', 'e')
+#     graph.add_edge('d', 'f')
+#     
+#     graph.add_edge('e', 'f')
+#         
+#     nx.draw(graph, node_color="#57f542", with_labels=True)
+#     plt.show()

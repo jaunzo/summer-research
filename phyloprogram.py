@@ -92,8 +92,8 @@ class Program(Tk):
         
         self.drspr_menu = Menu(self.file_menu, tearoff=0)
         self.file_menu.add_cascade(label="Calculate drSPR", menu=self.drspr_menu)
-        self.drspr_menu.add_command(label="Enter trees", command=self.new_trees, accelerator="Ctrl+T")
-        self.drspr_menu.add_command(label="Open trees...", command=self.open_trees, accelerator="Ctrl+Shift+O")
+        self.drspr_menu.add_command(label="Enter trees", command=lambda: self.new_trees("Calculate drSPR"), accelerator="Ctrl+T")
+        self.drspr_menu.add_command(label="Open trees...", command=lambda: self.open_trees("Calculate drSPR"), accelerator="Ctrl+Shift+O")
         
         self.file_menu.add_separator()
         
@@ -120,8 +120,8 @@ class Program(Tk):
         
         self.bind_all("<Control-n>", self.new_network)
         self.bind_all("<Control-o>", self.open_network)
-        self.bind_all("<Control-t>", self.new_trees)
-        self.bind_all("<Control-O>", self.open_trees)
+        self.bind_all("<Control-t>", lambda event: self.new_trees("Calculate drSPR"))
+        self.bind_all("<Control-O>", lambda event: self.open_trees("Calculate drSPR"))
         self.bind_all("<Control-T>", self.save_text)
         self.bind_all("<Control-I>", self.save_image)
         
@@ -413,19 +413,19 @@ class Program(Tk):
         
         self._enable_save()
     
-    def new_trees(self, *_):
+    def new_trees(self, rspr_operation):
         """Displays dialog and gets at least 2 trees in newick format inputted by the user"""
         if self.input_prompt:
-            self.input_prompt.change_contents("Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);")
+            self.input_prompt.change_contents(f"{rspr_operation}: Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);")
             self.input_prompt.update()
             self.input_prompt.deiconify()
         else:
-            self.input_prompt = StringInputPrompt(self, "Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);", False)
+            self.input_prompt = StringInputPrompt(self, f"{rspr_operation}: Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);", False)
 
     
-    def open_trees(self, *_):
+    def open_trees(self, rspr_operation):
         """Opens file that contains at least 2 trees in newick format"""
-        filename =  tkinter.filedialog.askopenfilename(initialdir = self.trees_directory, title = "Open trees...",
+        filename =  tkinter.filedialog.askopenfilename(initialdir = self.trees_directory, title = f"{rspr_operation}: Open trees...",
                                                        filetypes = (("text files","*.txt"),("all files","*.*")))
 
         path = os.path.split(filename)
