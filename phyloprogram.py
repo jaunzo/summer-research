@@ -418,7 +418,7 @@ class Program(Tk):
             self.input_prompt.update()
             self.input_prompt.deiconify()
         else:
-            self.input_prompt = StringInputPrompt(self, "Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);", False)
+            self.input_prompt = StringInputPrompt(self, f"{operation}: Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);", self.operation)
 
     
     def open_trees(self, *_):
