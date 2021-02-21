@@ -223,10 +223,9 @@ if __name__ == "__main__":
     trees.append("(1,(2,3));")
     trees_str = "\n".join(trees)
     
-    f = open("4trees_invalid.txt", "r")
-    trees_string = f.read()
-    
-    rspr_graph = RsprGraph(trees_string)
+    rspr_graph = RsprGraph(trees_str)
+    rspr_graph.draw()
+    plt.show()
     print(rspr_graph.text)
     
 
