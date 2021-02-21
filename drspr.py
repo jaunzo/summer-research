@@ -145,8 +145,6 @@ def calculate_drspr(trees):
     """
     length = len(trees)
     
-    
-    
     if length < 2:
         raise MalformedNewickException
     

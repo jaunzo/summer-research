@@ -1,10 +1,8 @@
 # Summer Research Scholarship Project
 
-This program takes a small binary phylogenetic network in extended newick format
-and generates trees displayed by the network. It can also calculate drSPR when 
-given at least 2 trees. When more than 2 trees are inputted, all trees are 
-compared pairwise. It can open text files containing the network in newick 
-format and export the generated network as text or image files.
+This program can generate embedded trees from a small, binary, phylogenetic 
+network, calculate rooted subtree prune and regraft distance (drSPR) and 
+create an rSPR graph from a small set of trees. 
 
 --------------------------------------------------------------------
 
@@ -47,6 +45,17 @@ dot - graphviz version 2.44.1 (20200629.0846)
 ```
 
 &nbsp;
+## Scaling on Windows
+If you have a high dpi monitor and the program is too small,
+- Right click on phyloprogram.exe
+- Click "Properties"
+- Click the "Compatibility" tab
+- Click "Change high DPI settings"
+- Check option "Override high DPI scaling behaviour" and select "Application" in the
+  Drop down menu
+- Apply the changes 
+
+&nbsp;
 ## Contents of requirements.txt
 ```
 networkx==2.5
@@ -55,7 +64,8 @@ cached_property==1.5.2
 matplotlib==3.3.3
 ```
 
+&nbsp;
 ## Credits
-This program uses [cwhidden's rspr software package](https://github.com/cwhidden/rspr).
+This program uses cwhidden's [rspr](https://github.com/cwhidden/rspr) and [spr_neighbors](https://github.com/cwhidden/spr_neighbors) software packages.
 
 ## 

@@ -69,8 +69,8 @@ class MultiChoicePrompt(Toplevel):
         self.error_message_frame = Frame(self)
         self.error_message_frame.pack(anchor="c", fill="x")
 
-        self.ok_button = Button(self, text="OK", width=20, command=self._get_input_leaves)
-        self.ok_button.pack(pady=(20, 20))
+        ok_button = Button(self, text="OK", width=20, command=self._get_input_leaves)
+        ok_button.pack(pady=(20, 20))
         
     def _text_focus_off(self, *_):
         """Removes focus from the TextWithPlaceholder object."""
@@ -82,6 +82,8 @@ class MultiChoicePrompt(Toplevel):
         
     def _get_input_leaves(self):
         """Get the input leaves from the text field."""
+        self._clear_error_messages()
+        
         if self.v.get() == 0:
             input_leaves = self.main.network.labelled_leaves
         else:
@@ -92,7 +94,7 @@ class MultiChoicePrompt(Toplevel):
                 raise InvalidLeaves
             
             self.main.network.set_current_selected_leaves(input_leaves)
-            self.main.generate_trees()
+            self.main.generate_trees_graph()
             self._exit()
             
         except InvalidLeaves as e:
@@ -118,7 +120,7 @@ class MultiChoicePrompt(Toplevel):
 
 class StringInputPrompt(Toplevel):
     """Class for prompt dialog that asks for string input"""
-    def __init__(self, main_window, title, prompt, placeholder="", network=True, **kwargs):
+    def __init__(self, main_window, title, prompt, placeholder="", operation="Network", **kwargs):
         """
         Parameters
         ----------
@@ -143,7 +145,8 @@ class StringInputPrompt(Toplevel):
         self.title(title)
         self.placeholder = placeholder
         self.protocol("WM_DELETE_WINDOW", self._exit)
-        self.is_network = network
+        #self.is_network = network
+        self.operation = operation
         
         prompt_frame = Frame(self)
         prompt_frame.pack(side="top")
@@ -160,10 +163,10 @@ class StringInputPrompt(Toplevel):
         
         self.buttons_frame = Frame(self)
         self.buttons_frame.pack(side="bottom", anchor="c", pady=(10, 20))
-        self.ok_button = Button(self.buttons_frame, text="OK", width=20, command=self._get_input)
-        self.cancel_button = Button(self.buttons_frame, text="Cancel", width=20, command=self._exit)
-        self.ok_button.pack(side="left", padx=(20,10))
-        self.cancel_button.pack(side="right", padx=(10,20))
+        ok_button = Button(self.buttons_frame, text="OK", width=20, command=self._get_input)
+        cancel_button = Button(self.buttons_frame, text="Cancel", width=20, command=self._exit)
+        ok_button.pack(side="left", padx=(20,10))
+        cancel_button.pack(side="right", padx=(10,20))
         
     def change_contents(self, title, prompt, placeholder=""):
         """
@@ -194,10 +197,12 @@ class StringInputPrompt(Toplevel):
         input_text = self.text_entry.get("1.0", "end").strip()
         
         try:
-            if self.is_network:
+            if self.operation == "Network":
                 self.main.generate_network(input_text)
-            else:
+            elif self.operation == "Calculate drSPR":
                 self.main.get_drspr(input_text)
+            else:
+                self.main.get_rspr_graph(input_text)
                 
             self._exit()
         

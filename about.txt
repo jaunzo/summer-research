@@ -1,16 +1,17 @@
 Version 2.0
 
-This program takes a small binary phylogenetic network in extended newick format
-and generates trees displayed by the network. It can also calculate drSPR when 
-given at least 2 trees. When more than 2 trees are inputted, all trees are 
-compared pairwise. It can open text files containing the network in newick 
-format and export the generated network as text or image files.
+This program can generate embedded trees from a small, binary, phylogenetic 
+network, calculate rooted subtree prune and regraft distance (drSPR) and 
+create an rSPR graph from a small set of trees. 
 
 Graphviz must be installed to enable graph visualisation.
 
 Release notes v2.0:
+- Added rspr graph functionality
 - Added drSPR functionality
 - Fixed bug that showed duplicate trees with graphics enabled when trees window 
   is closed and immediately opened again by clicking "Show trees" button
+- Fixed multiple error messages showing on "Select leaves" window when making 
+  an error twice in a row
 
 Python 3.8.6

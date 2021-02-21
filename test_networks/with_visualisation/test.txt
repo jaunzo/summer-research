@@ -1,0 +1,17 @@
+NETWORK:
+((a,(b)#H1), (#H1,c));
+
+Reticulations: 1
+Network leaves:
+['a', 'b', 'c']
+
+
+TREES
+Leaves
+('a', 'b', 'c')
+
+Total trees: 2
+Distinct trees: 2
+
+((b,c),a);  x1
+((a,b),c);  x1
