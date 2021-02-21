@@ -6,6 +6,7 @@ https://github.com/cwhidden/spr_neighbors
 """
 import platform
 import path
+import subprocess
 from subprocess import PIPE, Popen
 import networkx as nx
 import matplotlib.pyplot as plt

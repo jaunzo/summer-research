@@ -16,5 +16,6 @@ Release notes v2.0:
   is closed and immediately opened again by clicking "Draw graph/trees" button
 - Fixed multiple error messages showing on "Select leaves" window when making 
   an error twice in a row
+- Fixed toolbar tooltips on Mac
 
 Python 3.8.6

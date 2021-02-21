@@ -61,6 +61,7 @@ class Program(Tk):
         
         #initialise network figure canvas in main window
         self.net_fig = plt.figure("Input network")
+        self.net_fig.gca().clear()
         self.net_canvas = FigureCanvasTkAgg(self.net_fig, master=self.main_frame)
         
         self._initialise_main_text_widget()
@@ -375,9 +376,11 @@ class Program(Tk):
         
     def display_network(self):
         """Display input network in the main window."""
+        
         if self.graph_window:
             self.graph_window.withdraw()
             
+        
         self.net_fig.gca().clear()
         
         try:
@@ -778,8 +781,7 @@ class GraphWindow(Window):
         self.graph_trees = graph_trees
         
         self.scroll_setup()
-        if self.operation == "Network":
-            self._initialise_info_bar()
+        self._initialise_info_bar()
         self.display_figures()
         
         
@@ -813,11 +815,15 @@ class GraphWindow(Window):
     def _initialise_info_bar(self):
         """Setup info bar at bottom which displays number of trees"""
         info_frame = Frame(self)
-        num_total_trees = self.main.network.total_trees
         info_frame.pack(side="bottom", fill="x")
         
-        num_unique_trees = self.main.graph_trees.num_unique_trees
-        info_text = f"{num_unique_trees} distinct trees, {num_total_trees} total trees"
+        if self.main.network:
+            num_total_trees = self.main.network.total_trees
+            num_unique_trees = self.main.graph_trees.num_unique_trees
+            info_text = f"{num_unique_trees} distinct trees, {num_total_trees} total trees"
+        else:
+            info_text = ""
+        
         self.info_label = Label(info_frame, text=info_text)
         self.info_label.pack(anchor="c")
             
