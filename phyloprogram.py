@@ -402,15 +402,16 @@ class Program(Tk):
         #Get Trees object
         if self.network:
             self.graph_trees = self.network.process()
-            self.graph_trees.draw()
             
             if not self.graphics:
+#                 #self.graph_trees.draw()
+#                 self.display_trees_graph()
+#             else:
                 self.print_trees()
                 
-        if self.graphics:
+        elif self.graphics:
             self.display_trees_graph()
-        
-        
+
         
     def print_trees(self):
         """Displays trees generated as text in the main window"""
@@ -424,9 +425,11 @@ class Program(Tk):
     
     def display_trees_graph(self, **kwargs):
         """
-        Displays trees in a window when user clicks "Show trees" or selects leaves. Only one trees window is
+        Displays trees in a window when user clicks "Draw graph/trees" or selects leaves. Only one trees window is
         displayed at a time
         """
+        self.graph_trees.draw()
+        
         if self.graph_window:
             self.graph_window.deiconify()
             self.graph_window.replace_graph(self.graph_trees, self.operation)
@@ -520,7 +523,6 @@ class Program(Tk):
         if self.graphics:
             self._enable_save()
             self._enable_tree_display()
-            self.graph_trees.draw()
             
         else:
             self._enable_text_save()
@@ -567,7 +569,6 @@ class Program(Tk):
         if self.graphics:
             self._enable_save()
             self._enable_tree_display()
-            self.graph_trees.draw()
             
         else:
             self._enable_text_save()

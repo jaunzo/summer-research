@@ -86,6 +86,12 @@ def rspr_pairwise(trees):
     tuple(list[str], list[str], list[Tree])
         Tuple of distance array, clusters array and trees array
     """
+    #Calculating total number of comparisons
+    num_comparisons = 0
+    for i in range(len(trees) + 1):
+        num_comparisons += i
+    
+    print("\nPerforming pairwise distance calculation...")
     length = len(trees)
     
     tree_error_text = "Error with format. Check that tree has correct number of opening and closing brackets and terminates with semicolon."
@@ -97,9 +103,13 @@ def rspr_pairwise(trees):
     distance_array = [["-" for i in range(length)] for j in range(length)]
     clusters_array = [["-" for i in range(length)] for j in range(length)]
     
+    compare_count = 1
+    
     for i in range(len(trees)):
         for j in range(i, len(trees)):
             try:
+                print(f'\r {round(compare_count / num_comparisons*100)}% complete: Calculating between t{i+1} and t{j+1}', end="\r", flush=True)
+                compare_count += 1
                 t1 = Tree(trees[i] + ";", f"t{i+1}")
                 t2 = Tree(trees[j] + ";", f"t{j+1}")
                 trees_array[i] = t1
@@ -125,8 +135,8 @@ def rspr_pairwise(trees):
             except MalformedNewickException:
                 distance_array[i][j] = "X"
                 clusters_array[i][j] = ["Error occured. Check tree newick string."]
-            
-            
+                
+    print(f'\r Complete: pairwise distance calculation for {len(trees)} trees\n', end="\r")
     return (distance_array, clusters_array, trees_array)
 
 def calculate_drspr(trees):
@@ -272,7 +282,8 @@ class Trees:
         list[Figure]
             Array of figures where trees are drawn
         """
-        
+        print("\nDrawing trees...")
+        total_trees = len(self.trees)
         #Number of rows and cols per figure
         #i.e rows * cols supbplots/trees per figure
         rows = 1
@@ -300,9 +311,10 @@ class Trees:
                 tree_ax.title.set_text(f"t{i+1}")
                 
                 np.create_graph(tree, figure.gca())
-                
+            
+            print(f'\r {round(i / total_trees * 100)} complete: Trees drawn {i} / {total_trees}', end="\r", flush=True)
         #plt.show()
-        
+        print(f" Complete: Drawn all {total_trees} trees \n")
         return self.figures
                 
     

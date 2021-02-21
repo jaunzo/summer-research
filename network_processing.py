@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import copy
 
 from cached_property import cached_property
+from typing import List
+import math
 
 
 def create_graph(graph, ax):
@@ -290,6 +292,7 @@ class EmbeddedTrees:
         self.tree_figs = []
         self.network = network
         self._selected_leaves = leaves
+        self.total_trees = int(math.pow(2, self.network.num_reticulations))
         
     @property
     def num_unique_trees(self):
@@ -362,8 +365,10 @@ class EmbeddedTrees:
     def generate(self):
         """Get and plot all unique trees displayed by the given network with the number of occurence displayed above the plot."""
         unique_tree_newicks = set()
-
-        for unsuppressed_tree in self.network.all_trees:
+        
+        print("\nGenerating embedded trees...")
+        
+        for i, unsuppressed_tree in enumerate(self.network.all_trees, start=1):
             tree = PhylogeneticNetwork(unsuppressed_tree.eNewick())
             
             #Reduce tree
@@ -383,6 +388,9 @@ class EmbeddedTrees:
                 unique_tree_newicks.add(tree_newick)
 
             self.trees_data[tree_newick].append(tree)
+            print(f'\r Trees generated {i} / {self.total_trees}', end="\r", flush=True)
+            
+        print(f" Complete: Generated all {self.total_trees} trees.\n")
     
     def remove_unselected_leaves(self, tree):
         """
@@ -441,6 +449,7 @@ class EmbeddedTrees:
             Logic to close tree figures that are drawn (default is True). False if you want to use matplotlib's
             figure interface instead of phyloprogram front end.
         """
+        print("\nDrawing trees...")
         tree_axes = {} #Dictionary of unique tree newicks with plot axes
         unique_plot_count = 1
         
@@ -450,7 +459,7 @@ class EmbeddedTrees:
         rows = 1
         cols = 2
         
-        for tree_newick, data in self.trees_data.items():
+        for i, (tree_newick, data) in enumerate(self.trees_data.items()):
             #Draw the output trees
             #Display rows * cols trees per figure
             if unique_plot_count > rows * cols:
@@ -474,6 +483,7 @@ class EmbeddedTrees:
             
             create_graph(data[1], unique_trees_fig.gca())
             unique_plot_count += 1
+            print(f'\r {round(i / self.total_trees * 100)} complete: Trees drawn {i} / {self.total_trees}', end="\r", flush=True)
                 
         #Add number of occurences as the title above each subplot
         for tree_newick in self.trees_data.keys():
@@ -481,6 +491,7 @@ class EmbeddedTrees:
             tree_count = self.trees_data[tree_newick][0]
             tree_ax.title.set_text(tree_count)
             
+        print(f" Complete: Drawn all {self.total_trees} trees.\n")
             
 if __name__ == "__main__":
     net_newick = "(((1, (2) #H2), ((#H2, #H3))#H1), (#H1, ((3)#H3, 4)));"

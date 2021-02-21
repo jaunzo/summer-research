@@ -52,6 +52,7 @@ class RsprGraph:
                 self.valid_trees.append(f"{tree};")
             except MalformedNewickException:
                 self.tree_label_dict[f"{tree};"] = f"t{i}"
+        
     
     @property
     def text(self):
