@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import copy
 
 from cached_property import cached_property
-from typing import List
 
 
 def create_graph(graph, ax):

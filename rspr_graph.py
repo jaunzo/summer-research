@@ -121,17 +121,16 @@ class RsprGraph:
             err = executable.stderr.decode("utf-8")
         
         out = out.strip()
-        output_list = out.split("\n")
         
         if err:
             print(err)
             print("Error occured in spr_dense_graph")
             
         #Create adjacency dict
-        lines_array = out.split()
+        output_lines = out.split()
         self.adjacency_dict = {}
         
-        for i, line in enumerate(lines_array):
+        for line in output_lines:
             array = line.split(",")
             
             node_index = int(array[0])
@@ -152,8 +151,6 @@ class RsprGraph:
     def create_graph(self):
         """Create graph using networkx"""
         self.graph = nx.Graph()
-        
-        length = len(self.valid_trees)
         
         for tree in self.valid_trees:
             node = self.tree_label_dict[tree]
@@ -225,7 +222,7 @@ if __name__ == "__main__":
     
     rspr_graph = RsprGraph(trees_str)
     rspr_graph.draw()
-    plt.show()
+    plt.show() #Show the drawn graph
     print(rspr_graph.text)
     
 

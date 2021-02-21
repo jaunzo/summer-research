@@ -157,10 +157,10 @@ def calculate_drspr(trees):
             try:
                 trees_array[i] = Tree(trees[i] + ";", f"t{i+1}")
                 
-            except MalformedNewickException as e:
+            except MalformedNewickException:
                 trees_array[i] = f"{trees_array[i]}\nError with format. Check that tree has correct number of opening and closing brackets and terminates with semicolon.\n"
                 distances = ["X"]
-                clusters = [f"Error occured. Check tree newick strings."]
+                clusters = ["Error occured. Check tree newick strings."]
                 #return (distances, clusters, Trees(trees_array))
         
         try:
@@ -308,13 +308,13 @@ class Trees:
     
 if __name__ == "__main__":
     trees = []
-#     trees.append("(((((((1,9),2),((13,3),8)),12),15),(((((14,6),4),7),11),10)),")
-#     trees.append("((((((((((14,6),4),7),11),(1,9)),2),((13,3),8)),15),(10,12)),5)")
-#     trees.append("(((((((14,6),4),7),11),(10,12)),((((1,9),2),((13,3),8)),15)),5)")
-#     trees.append("((((((((((14,6),4),7),11),((1,5),9)),2),((13,3),8)),12),15),10)")
-#     trees.append("(((((((1,5),9),2),((13,3),8)),12),15),(((((14,6),4),7),11),10))")
-    trees.append("(((1,2),3),4)")
-    trees.append("(((1,4),2),)")
+    trees.append("(((((((1,9),2),((13,3),8)),12),15),(((((14,6),4),7),11),10)),5)")
+    trees.append("((((((((((14,6),4),7),11),(1,9)),2),((13,3),8)),15),(10,12)),5)")
+    trees.append("(((((((14,6),4),7),11),(10,12)),((((1,9),2),((13,3),8)),15)),5)")
+    trees.append("((((((((((14,6),4),7),11),((1,5),9)),2),((13,3),8)),12),15),10)")
+    trees.append("(((((((1,5),9),2),((13,3),8)),12),15),(((((14,6),4),7),11),10))")
+#     trees.append("(((1,2),3),4)")
+#     trees.append("(((1,4),2),)")
     
     (distances, clusters, trees_obj) = calculate_drspr(trees)
     length = len(distances)
