@@ -400,9 +400,13 @@ class Program(Tk):
         if self.network:
             self.graph_trees = self.network.process()
             self.graph_trees.draw()
+            
+            if not self.graphics:
+                self.print_trees()
                 
         if self.graphics:
             self.display_trees_graph()
+        
         
         
     def print_trees(self):
@@ -791,8 +795,8 @@ class GraphWindow(Window):
         plt.close("all") #Close all figures
         
         #Update number of unique trees
-        if self.operation == "Network":
-            self._update_info_bar()
+        self._update_info_bar()
+            
         
         
     def _update_info_bar(self):
@@ -802,6 +806,8 @@ class GraphWindow(Window):
             num_total_trees = self.main.network.total_trees
             info_text = f"{num_unique_trees} distinct trees, {num_total_trees} total trees"
             self.info_label["text"] = info_text
+        else:
+            self.info_label["text"] = ""
       
         
     def _initialise_info_bar(self):
