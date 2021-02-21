@@ -7,10 +7,13 @@ create an rSPR graph from a small set of trees.
 Graphviz must be installed to enable graph visualisation.
 
 Release notes v2.0:
-- Added rspr graph functionality
+- Added rSPR graph functionality
 - Added drSPR functionality
+- Changed toolbar button "Show trees" to "Draw graph/trees"
+- To generate embedded trees from a network, user must now click on "Select 
+  leaves" as "Show trees" button is no longer available.
 - Fixed bug that showed duplicate trees with graphics enabled when trees window 
-  is closed and immediately opened again by clicking "Show trees" button
+  is closed and immediately opened again by clicking "Draw graph/trees" button
 - Fixed multiple error messages showing on "Select leaves" window when making 
   an error twice in a row
 
