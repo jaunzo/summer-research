@@ -4,11 +4,10 @@ Module that handles the generation of trees displayed by input network
 
 from phylonetwork import PhylogeneticNetwork
 import matplotlib.pyplot as plt
-import copy
+import copy, math
 
 from cached_property import cached_property
 from typing import List
-import math
 
 
 def create_graph(graph, ax):

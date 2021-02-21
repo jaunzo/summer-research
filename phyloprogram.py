@@ -9,18 +9,36 @@ from tkinter import (Tk, Canvas, Scrollbar, Menu, Toplevel,
                      Frame, Label, Text, IntVar, Checkbutton)
 from network_processing import Network
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import sys, os
+import sys, os, platform, webbrowser
 import matplotlib.pyplot as plt
 from widgets import HoverButton
 from phylonetwork import MalformedNewickException
 from dialogs import (MultiChoicePrompt, StringInputPrompt)
 from widgets import ToolTip
-import platform
-import webbrowser
 import drspr as d
-import path
 from rspr_graph import RsprGraph
 
+def resource_path(relative_path):
+    """
+    Get absolute path to resource, works for dev and for PyInstaller
+    
+    Parameters
+    ----------
+    relative_path : str
+        Relative path to file from script's location
+        
+    Returns
+    -------
+    str
+        Absolute path to file
+    """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.environ.get("_MEIPASS2",os.path.abspath("."))
+
+    return os.path.join(base_path, relative_path)
 
 class Program(Tk):
     """
@@ -269,7 +287,7 @@ class Program(Tk):
     def about(self):
         """Display overview of program in window"""
         self.about_window = Window(title="About")
-        path_file = path.resource_path("about.txt")
+        path_file = resource_path("about.txt")
         f = open(path_file, "r")
         about_text = f.read()
         text_widget = Text(self.about_window)
@@ -281,7 +299,7 @@ class Program(Tk):
         """Display program manual in window"""
         self.manual_window = Window(title="Manual", width=self.scaled_width,
                                     height=self.scaled_height//2)
-        path_file = path.resource_path("manual.txt")
+        path_file = resource_path("manual.txt")
         f = open(path_file, "r")
         manual_text = f.read()
         text_widget = Text(self.manual_window, width=30)
@@ -687,7 +705,7 @@ class Program(Tk):
                                             icon = "warning")
         if MsgBox == "yes":
             self.destroy()
-            exit()
+            sys.exit()
             
 
 class Window(Toplevel):

@@ -4,13 +4,33 @@ Module that calculates spr neighbours
 Source code for spr_dense_graph executable:
 https://github.com/cwhidden/spr_neighbors
 """
-import platform
-import path
-import subprocess
+import platform, sys, os, subprocess
 from subprocess import PIPE, Popen
 import networkx as nx
 import matplotlib.pyplot as plt
 from phylonetwork import MalformedNewickException, PhylogeneticNetwork
+    
+def resource_path(relative_path):
+    """
+    Get absolute path to resource, works for dev and for PyInstaller
+    
+    Parameters
+    ----------
+    relative_path : str
+        Relative path to file from script's location
+        
+    Returns
+    -------
+    str
+        Absolute path to file
+    """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.environ.get("_MEIPASS2",os.path.abspath("."))
+
+    return os.path.join(base_path, relative_path)
     
 class RsprGraph:
     """Class for creating rspr graph"""
@@ -103,7 +123,7 @@ class RsprGraph:
             trees_string += f"{tree}\n"
         
         if platform.system() == "Windows":
-            file = path.resource_path("spr_dense_graph.exe")
+            file = resource_path("spr_dense_graph.exe")
             executable = Popen(executable=file, args="", stdin=PIPE,
                                    stdout=PIPE, stderr=PIPE,
                                    universal_newlines=True, shell=True)
@@ -114,7 +134,7 @@ class RsprGraph:
             executable.kill()
             
         else:
-            file = path.resource_path("spr_dense_graph")
+            file = resource_path("spr_dense_graph")
             executable = subprocess.run(file, stdout=PIPE, stderr=PIPE,
                                         input=trees_string.encode("utf-8"),
                                         shell=True)
