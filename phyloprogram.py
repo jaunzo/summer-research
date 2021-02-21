@@ -400,12 +400,6 @@ class Program(Tk):
         if self.network:
             self.graph_trees = self.network.process()
             self.graph_trees.draw()
-            
-            if self.network.graphics:
-                self.graph_trees.draw()
-                #self.display_trees_graph()
-            else:
-                self.print_trees()
                 
         if self.graphics:
             self.display_trees_graph()
@@ -428,10 +422,17 @@ class Program(Tk):
         """
         if self.graph_window:
             self.graph_window.deiconify()
-            self.graph_window.replace_graph(self.graph_trees)
+            self.graph_window.replace_graph(self.graph_trees, self.operation)
         else:
             #Create window
-            self.graph_window = GraphWindow(self, self.graph_trees, width=self.scaled_width, height=self.scaled_height, title="Trees", operation=self.operation, **kwargs)            
+            if self.operation == "Network":
+                title = "Embedded trees"
+            elif self.operation == "Create rSPR graph":
+                title = "rSPR Graph"
+            else:
+                title = "Trees"
+            
+            self.graph_window = GraphWindow(self, self.graph_trees, width=self.scaled_width, height=self.scaled_height, title=title, operation=self.operation, **kwargs)            
         
         self._enable_save()
     
@@ -821,7 +822,7 @@ class GraphWindow(Window):
             canvas.get_tk_widget().destroy()
             
             
-    def replace_graph(self, new_graph_trees):
+    def replace_graph(self, new_graph_trees, operation):
         """
         Replace the trees currently displayed.
         
@@ -830,6 +831,14 @@ class GraphWindow(Window):
         new_graph_trees : EmbeddedTrees or Trees
             Object that replaces the current trees object
         """
+        self.operation = operation
+        if self.operation == "Network":
+            self.title("Embedded trees")
+        elif self.operation == "Create rSPR graph":
+            self.title("rSPR Graph")
+        else:
+            self.title("Trees")
+        
         if self.graph_trees != new_graph_trees or (self.operation == "Network" and self.graph_trees.leaves != new_graph_trees.leaves):
             self.clear_figures()
             self.graph_trees = new_graph_trees
