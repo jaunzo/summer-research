@@ -214,6 +214,9 @@ class Program(Tk):
         scroll = Scrollbar(self.main_text_widget, command=self.main_text_widget.yview)
         self.main_text_widget['yscrollcommand'] = scroll.set
         scroll.pack(side="right", fill="y")
+        
+        #Bind to make text selectable on Mac
+        self.main_text_widget.bind("<1>", lambda event: self.main_text_widget.focus_set())
     
         
     def _enable_tree_tools(self):
