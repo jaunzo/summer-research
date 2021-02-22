@@ -17,5 +17,7 @@ Release notes v2.0:
 - Fixed multiple error messages showing on "Select leaves" window when making 
   an error twice in a row
 - Fixed toolbar tooltips on Mac
+- Added progress indicator when generating and drawing graphs/trees
+- Made text in main window selectable on Mac
 
 Python 3.8.6

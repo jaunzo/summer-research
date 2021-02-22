@@ -672,6 +672,7 @@ class Program(Tk):
                 file_contents = self.main_text_widget.get("1.0","end")
                 title = "Saving trees as text file"
             
+            print("Saving as text file...")
             f =  tkinter.filedialog.asksaveasfile(initialdir = location, title = title, 
                                           filetypes = [("Text file","*.txt")], 
                                           defaultextension = [("Text file", "*.txt")])
@@ -681,6 +682,7 @@ class Program(Tk):
             
             f.write(file_contents)
             f.close()
+            print(" Text file saved.")
         
         
     def save_image(self, *_):
@@ -700,7 +702,8 @@ class Program(Tk):
 
             #Export network
             if directory: #if dialog closed with "cancel".
-            
+                print("\nSaving image(s)...")
+                
                 if self.network:
                     self.net_fig.savefig(export_path + "/network.png", bbox_inches="tight")
                 
@@ -709,12 +712,17 @@ class Program(Tk):
                     
                 else:
                     #Export trees
-                    count = 1
-                    for tree_fig in self.graph_trees.figures:
-                        tree_fig.savefig(f"{abs_path}{directory}/trees{str(count)}.png", bbox_inches="tight")
-                        count += 1
-                        
-                print("Image(s) saved.")
+                    num_figures = len(self.graph_trees.figures)
+                    
+                    
+                    #count = 1
+                    for i, tree_fig in enumerate(self.graph_trees.figures, start=1):
+                        tree_fig.savefig(f"{abs_path}{directory}/trees{str(i)}.png", bbox_inches="tight")
+                        #count += 1
+                        print(f'\r {round(i / num_figures * 100)}% complete: Tree figures saved {i} / {num_figures}', end="\r", flush=True)
+                    
+                    print()
+                print(" Complete: Image(s) saved.\n")
         
         
     def _exit(self):

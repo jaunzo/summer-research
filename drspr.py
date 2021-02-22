@@ -331,7 +331,7 @@ class Trees:
                 tree_ax.title.set_text(f"t{i+1}")
                 
                 np.create_graph(tree, figure.gca())
-            
+                
             print(f'\r {round(i / total_trees * 100)}% complete: Trees drawn {i} / {total_trees}', end="\r", flush=True)
         #plt.show()
         print(f" Complete: Drawn all {total_trees} trees \n")

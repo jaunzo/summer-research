@@ -172,6 +172,7 @@ class RsprGraph:
         
     def create_graph(self):
         """Create graph using networkx"""
+        print("\nCreating graph...")
         self.graph = nx.Graph()
         
         for tree in self.valid_trees:
@@ -181,14 +182,17 @@ class RsprGraph:
         for node, neighbor_array in self.adjacency_dict.items():
             for neighbor in neighbor_array:
                 self.graph.add_edge(node, neighbor)
-
+        
+        print(" rSPR graph complete")
             
     def draw(self):
         """Draw graph on figure"""
+        print("\nDrawing rSPR graph...")
         figure = plt.figure()
         nx.draw(self.graph, node_color="#57f542", with_labels=True, ax=figure.gca())
         self.figures = [figure]
-    
+        print(" Completed drawing rSPR graph\n")
+            
             
     @staticmethod
     def hamiltonian_cycle(graph, current_vertex, path, root, num_nodes):
