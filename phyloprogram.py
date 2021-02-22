@@ -250,6 +250,12 @@ class Program(Tk):
         self.save_sub_menu.entryconfigure("Text file", state = "normal")
         self.save_sub_menu.entryconfigure("Images", state="disabled")
         
+    def _disable_save(self):
+        self.text_save_enabled = False
+        self.image_save_enabled = False
+        self.save_sub_menu.entryconfigure("Text file", state = "disabled")
+        self.save_sub_menu.entryconfigure("Images", state="disabled")
+        
         
     def _scale_window(self, window_length):
         """
@@ -366,6 +372,7 @@ class Program(Tk):
         self._update_info_bar(filename)
         
         self.net_newick = net_newick
+        self._disable_save()
         
         if self.graphics:
             self._enable_tree_tools()
@@ -422,12 +429,11 @@ class Program(Tk):
             self.graph_trees = self.network.process()
             
             if not self.graphics:
-#                 #self.graph_trees.draw()
-#                 self.display_trees_graph()
-#             else:
                 self.print_trees()
+            else:
+                self.graph_trees.draw()
                 
-        elif self.graphics:
+        if self.graphics:
             self.display_trees_graph()
 
         
@@ -446,7 +452,7 @@ class Program(Tk):
         Displays trees in a window when user clicks "Draw graph/trees" or selects leaves. Only one trees window is
         displayed at a time
         """
-        self.graph_trees.draw()
+        #self.graph_trees.draw()
         
         if self.graph_window:
             self.graph_window.deiconify()
@@ -538,6 +544,8 @@ class Program(Tk):
         self._update_info_bar(filename)
         self.print_rspr_graph()
         
+        self.graph_trees.draw()
+        
         if self.graphics:
             self._enable_save()
             self._enable_tree_display()
@@ -583,6 +591,7 @@ class Program(Tk):
         self.main_text_widget.pack(expand=True, fill="both")
         self._update_info_bar(filename)
         self.print_drspr(self.graph_trees.trees, distances, clusters)
+        self.graph_trees.draw()
         
         if self.graphics:
             self._enable_save()
@@ -692,11 +701,17 @@ class Program(Tk):
                 if self.network:
                     self.net_fig.savefig(export_path + "/network.png", bbox_inches="tight")
                 
-                #Export trees
-                count = 1
-                for tree_fig in self.graph_trees.figures:
-                    tree_fig.savefig(f"{abs_path}{directory}/trees{str(count)}.png", bbox_inches="tight")
-                    count += 1
+                if self.operation == "Create rSPR graph":
+                    self.graph_trees.figures[0].savefig(f"{abs_path}{directory}/rspr_graph.png", bbox_inches="tight")
+                    
+                else:
+                    #Export trees
+                    count = 1
+                    for tree_fig in self.graph_trees.figures:
+                        tree_fig.savefig(f"{abs_path}{directory}/trees{str(count)}.png", bbox_inches="tight")
+                        count += 1
+                        
+                print("Image(s) saved.")
         
         
     def _exit(self):
