@@ -2,7 +2,10 @@
 
 This program can generate embedded trees from a small, binary, phylogenetic 
 network, calculate rooted subtree prune and regraft distance (drSPR) and 
-create an rSPR graph from a small set of trees. 
+create an rSPR graph from a small set of trees. The program accepts trees 
+in Newick format and networks in extended Newick format where each tree/network 
+is terminated by a semicolon. It can save output results as a text file or 
+as series of images if graphics is enabled.
 
 --------------------------------------------------------------------
 
@@ -59,9 +62,9 @@ If you have a high dpi monitor and the program is too small,
 ## Contents of requirements.txt
 ```
 networkx==2.5
+matplotlib==3.3.3
 phylonetwork==2.1
 cached_property==1.5.2
-matplotlib==3.3.3
 ```
 
 &nbsp;
