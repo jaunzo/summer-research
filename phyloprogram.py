@@ -433,10 +433,11 @@ class Program(Tk):
             
             if not self.graphics:
                 self.print_trees()
-            else:
-                self.graph_trees.draw()
+#             else:
+#                 self.graph_trees.draw()
                 
         if self.graphics:
+            self.graph_trees.draw()
             self.display_trees_graph()
 
         
@@ -547,8 +548,6 @@ class Program(Tk):
         self._update_info_bar(filename)
         self.print_rspr_graph()
         
-        self.graph_trees.draw()
-        
         if self.graphics:
             self._enable_save()
             self._enable_tree_display()
@@ -594,7 +593,6 @@ class Program(Tk):
         self.main_text_widget.pack(expand=True, fill="both")
         self._update_info_bar(filename)
         self.print_drspr(self.graph_trees.trees, distances, clusters)
-        self.graph_trees.draw()
         
         if self.graphics:
             self._enable_save()
