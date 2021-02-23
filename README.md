@@ -68,6 +68,13 @@ cached_property==1.5.2
 ```
 
 &nbsp;
+## Capabilities
+This program can draw trees of networks that have less than 7 reticulations 
+and/or 10 leaves. Run the program without graph visualisation if the input 
+network contains less than 10 reticulations and/or 15-20 leaves.
+
+
+&nbsp;
 ## Credits
 This program uses cwhidden's [rspr](https://github.com/cwhidden/rspr) and [spr_neighbors](https://github.com/cwhidden/spr_neighbors) software packages.
 
