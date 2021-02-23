@@ -10,7 +10,7 @@ TREES EMBEDDED IN NETWORK
 -------------------------------
 File -> Enter network (Ctrl+N):
 -------------------------------
-Enter in a network in extended Newick format. Network string must contain at 
+Enter in a network in extended newick format. Network string must contain at 
 least one labelled leaf and must end with semicolon.
 
 
@@ -78,13 +78,15 @@ Saves the network and/or trees with other relevant information in a text file.
 ------------------------------------------------------
 File -> Save as... -> Text file (trees only) (Ctrl+T):
 ------------------------------------------------------
-Saves only embedded tree strings in a text file.
+Saves only embedded trees (newick format) in a text file.
 
 
 --------------------------------------------
 File -> Save as... -> Images (Ctrl+Shift+I):
 --------------------------------------------
-Saves the network and tree graphs as a series of images in selected folder.
+Saves the network and tree graphs as a series of images in selected folder. 
+Graphs must be drawn first (by clicking on "Draw trees/graph" button) to be able 
+to save images.
 
 
 =================================================================================
@@ -94,7 +96,7 @@ TOOLBAR
 Select leaves:
 --------------
 Generates trees displayed by the network that only contains the entered list 
-of leaves.
+of leaves. LIst of leaves must be a subset of the network leaves.
 
 
 -----------------
@@ -102,14 +104,13 @@ Draw trees/graph:
 -----------------
 Enabled when graphics is enabled.
 
-When calculating drSPR, this opens a window that visualises all entered valid 
-trees with tree number displayed above each tree if graphics is enabled.
+Draws embedded trees, rSPR graph or input trees depending on program function 
+used.
 
 
 ----------------
 Enable graphics:
 ----------------
-Enabled: Network and trees will be drawn as graphs. Graphviz must be installed.
-Disabled: Network and trees will be printed as text on the main window.
+Network, trees and/or graphs can be drawn.
 
 =================================================================================

@@ -720,10 +720,12 @@ class Program(Tk):
     def save_image(self, *_):
         """Saves all figures as a series of images in the directory that the user specifies."""
         if self.image_save_enabled:
-            if self.network:
-                title = "Select directory to save network and tree images"
+            if self.operation == "Network":
+                title = "Select folder to save network and tree images"
+            elif self.operation == "Create rSPR graph":
+                title = "Select folder to save graph"
             else:
-                title = "Select directory to save tree images"
+                title = "Select folder to save tree images"
             
             
             directory = tkinter.filedialog.askdirectory(initialdir = self.save_directory, title = title)
