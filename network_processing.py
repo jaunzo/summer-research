@@ -387,9 +387,9 @@ class EmbeddedTrees:
                 unique_tree_newicks.add(tree_newick)
 
             self.trees_data[tree_newick].append(tree)
-            print(f'\r Trees generated {i} / {self.total_trees}', end="\r", flush=True)
+            print(f'\r {round(i / self.total_trees * 100)}% complete: Trees generated {i} / {self.total_trees}', end="\r", flush=True)
             
-        print(f" Complete: Generated all {self.total_trees} trees.\n")
+        print(f" 100% complete: Generated all {self.total_trees} trees in network with {self.network.num_reticulations} reticulations.\n")
     
     def remove_unselected_leaves(self, tree):
         """
@@ -482,7 +482,7 @@ class EmbeddedTrees:
             
             create_graph(data[1], unique_trees_fig.gca())
             unique_plot_count += 1
-            print(f'\r {round(i / self.total_trees * 100)} complete: Trees drawn {i} / {self.total_trees}', end="\r", flush=True)
+            print(f'\r {round(i / self.total_trees * 100)}% complete: Trees drawn {i} / {self.total_trees}', end="\r", flush=True)
                 
         #Add number of occurences as the title above each subplot
         for tree_newick in self.trees_data.keys():
@@ -490,7 +490,7 @@ class EmbeddedTrees:
             tree_count = self.trees_data[tree_newick][0]
             tree_ax.title.set_text(tree_count)
             
-        print(f" Complete: Drawn all {self.total_trees} trees.\n")
+        print(f" 100% complete: Drawn all {self.total_trees} trees from network with {self.network.num_reticulations} reticulations.\n")
             
 if __name__ == "__main__":
     net_newick = "(((1, (2) #H2), ((#H2, #H3))#H1), (#H1, ((3)#H3, 4)));"

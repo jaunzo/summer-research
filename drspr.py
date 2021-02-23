@@ -155,8 +155,8 @@ def rspr_pairwise(trees):
             except MalformedNewickException:
                 distance_array[i][j] = "X"
                 clusters_array[i][j] = ["Error occured. Check tree newick string."]
-                
-    print(f'\r Complete: pairwise distance calculation for {len(trees)} trees\n', end="\r")
+
+    print(f'\r 100% complete: pairwise distance calculated for {len(trees)} trees\n', end="\r")
     return (distance_array, clusters_array, trees_array)
 
 def calculate_drspr(trees):
@@ -334,7 +334,7 @@ class Trees:
                 
             print(f'\r {round(i / total_trees * 100)}% complete: Trees drawn {i} / {total_trees}', end="\r", flush=True)
         #plt.show()
-        print(f" Complete: Drawn all {total_trees} trees \n")
+        print(f" 100% complete: Drawn all {total_trees} trees \n")
         return self.figures
                 
     
