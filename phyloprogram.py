@@ -728,8 +728,7 @@ class Program(Tk):
         MsgBox = tk.messagebox.askquestion ("Exit Application","Are you sure you want to exit the application?",
                                             icon = "warning")
         if MsgBox == "yes":
-            self.destroy()
-            sys.exit()
+            sys.exit(0)
             
 
 class Window(Toplevel):
