@@ -49,12 +49,14 @@ class Program(Tk):
         super().__init__()
         ORIGINAL_DPI = 96.0
         #Scale the window depending on current monitor's dpi
-        self.scale = self._get_dpi() / ORIGINAL_DPI
+        self.current_dpi = self._get_dpi()
+        self.scale = self.current_dpi / ORIGINAL_DPI
         self.tk.call("tk", "scaling", self.scale + 0.5)
         
         self.net_frame = None
         self.net_directory = ""
         self.trees_directory = ""
+        self.save_directory = ""
         self.net_fig = None
         self.graph_window = None
         
@@ -124,9 +126,11 @@ class Program(Tk):
         file_menu.add_separator()
         
         self.save_sub_menu = Menu(file_menu, tearoff=0)
+        self.save_sub_menu.add_command(label="Text file (trees only)", command=self.save_trees_only_text, accelerator="Ctrl+T")
         self.save_sub_menu.add_command(label="Text file", command=self.save_text, accelerator="Ctrl+Shift+T")
         self.save_sub_menu.add_command(label="Images", command=self.save_image, accelerator="Ctrl+Shift+I")
         file_menu.add_cascade(label="Save as...", menu=self.save_sub_menu)
+        self.save_sub_menu.entryconfigure("Text file (trees only)", state="disabled")
         self.save_sub_menu.entryconfigure("Text file", state = "disabled")
         self.save_sub_menu.entryconfigure("Images", state="disabled")
         self.text_save_enabled = False
@@ -151,6 +155,7 @@ class Program(Tk):
         self.bind_all("<Control-d>", lambda event: self.new_trees("Calculate drSPR"))
         self.bind_all("<Control-D>", lambda event: self.open_trees("Calculate drSPR"))
         self.bind_all("<Control-T>", self.save_text)
+        self.bind_all("<Control-t>", self.save_trees_only_text)
         self.bind_all("<Control-I>", self.save_image)
         
         
@@ -246,18 +251,28 @@ class Program(Tk):
         self.save_sub_menu.entryconfigure("Text file", state = "normal")
         self.save_sub_menu.entryconfigure("Images", state="normal")
         
+        if self.network:
+            self.save_sub_menu.entryconfigure("Text file (trees only)", state="normal")
+        else:
+            self.save_sub_menu.entryconfigure("Text file (trees only)", state="disabled")
+        
     def _enable_text_save(self):
         """For private use. Used when visualisation is disabled. Only save as text enabled"""
         self.text_save_enabled = True
         self.image_save_enabled = False
         self.save_sub_menu.entryconfigure("Text file", state = "normal")
         self.save_sub_menu.entryconfigure("Images", state="disabled")
+        if self.network:
+            self.save_sub_menu.entryconfigure("Text file (trees only)", state="normal")
+        else:
+            self.save_sub_menu.entryconfigure("Text file (trees only)", state="disabled")
         
     def _disable_save(self):
         self.text_save_enabled = False
         self.image_save_enabled = False
         self.save_sub_menu.entryconfigure("Text file", state = "disabled")
         self.save_sub_menu.entryconfigure("Images", state="disabled")
+        self.save_sub_menu.entryconfigure("Text file (trees only)", state="disabled")
         
         
     def _scale_window(self, window_length):
@@ -332,7 +347,7 @@ class Program(Tk):
             self.input_prompt.update()
             self.input_prompt.deiconify()
         else:
-            self.input_prompt = StringInputPrompt(self, "Enter network", "Enter network in extended newick format", "e.g. ((a,(b)#H1), (#H1,c));")
+            self.input_prompt = StringInputPrompt(self, "Enter network", "Enter network in extended newick format", "e.g. ((a,(b)#H1), (#H1,c));", self.operation)
         
             
     def open_network(self, *_):
@@ -487,6 +502,7 @@ class Program(Tk):
         
         if self.input_prompt:
             self.input_prompt.change_contents(f"{self.operation}: Enter trees", "Enter at least 2 trees in newick format", "e.g.\n(((1,2),3),4);\n(((1,4),2),3);")
+            self.input_prompt.operation = operation
             self.input_prompt.update()
             self.input_prompt.deiconify()
         else:
@@ -547,13 +563,11 @@ class Program(Tk):
         self.main_text_widget.pack(expand=True, fill="both")
         self._update_info_bar(filename)
         self.print_rspr_graph()
+        self._enable_text_save()
         
         if self.graphics:
-            self._enable_save()
-            self._enable_tree_display()
-            
+            self._enable_tree_display()     
         else:
-            self._enable_text_save()
             self._disable_tree_tools()
             
     def print_rspr_graph(self):
@@ -593,13 +607,11 @@ class Program(Tk):
         self.main_text_widget.pack(expand=True, fill="both")
         self._update_info_bar(filename)
         self.print_drspr(self.graph_trees.trees, distances, clusters)
+        self._enable_text_save()
         
         if self.graphics:
-            self._enable_save()
-            self._enable_tree_display()
-            
+            self._enable_tree_display()  
         else:
-            self._enable_text_save()
             self._disable_tree_tools()
             
             
@@ -655,58 +667,82 @@ class Program(Tk):
         
         self.main_text_widget.config(state="disabled")
         
-    
-    
-    def save_text(self, *_):
-        """Saves network and trees in newick format as a text file in the directory that the user specifies."""
-        if self.text_save_enabled:
-            if self.network:
-                location = self.net_directory
-                file_contents = self.network.text
-                file_contents += self.graph_trees.text
-                title = "Saving network and trees as text file"
-            else:
-                location = self.trees_directory
-                file_contents = self.main_text_widget.get("1.0","end")
-                title = "Saving trees as text file"
+    def save_trees_only_text(self, *_):
+        """Saves just the tree newick strings in text file"""
+        if self.text_save_enabled and self.network:
+            file_contents = ""
             
-            print("Saving as text file...")
-            f =  tkinter.filedialog.asksaveasfile(initialdir = location, title = title, 
+            for tree in self.graph_trees.data.keys():
+                file_contents += f"{tree}\n"
+            
+            title = "Saving trees as text file"
+            
+            f =  tkinter.filedialog.asksaveasfile(initialdir = self.save_directory, title = title, 
                                           filetypes = [("Text file","*.txt")], 
                                           defaultextension = [("Text file", "*.txt")])
             
-            if f is None: #if dialog closed with "cancel".
-                return
+            if f: #if dialog not closed with "cancel".
+                print("\nSaving trees only in text file...")
+                path = os.path.split(f.name)
+                self.save_directory = path[0]
+                
+                f.write(file_contents)
+                f.close()
+                print(f" Text file saved at {f.name}\n")
             
-            f.write(file_contents)
-            f.close()
-            print(" Text file saved.")
+            
+    def save_text(self, *_):
+        """Saves network and trees with any other information in newick format as a text file in the directory that the user specifies."""
+        if self.text_save_enabled:
+            if self.network:
+                file_contents = self.network.text
+                file_contents += self.graph_trees.text
+                title = "Saving network, trees and other info as text file"
+            else:
+                file_contents = self.main_text_widget.get("1.0","end")
+                title = "Saving trees and other info as text file"
+            
+            f =  tkinter.filedialog.asksaveasfile(initialdir = self.save_directory, title = title, 
+                                          filetypes = [("Text file","*.txt")], 
+                                          defaultextension = [("Text file", "*.txt")])
+            
+            if f: #if dialog not closed with "cancel".
+                print("\nSaving as text file...")
+                
+                path = os.path.split(f.name)
+                self.save_directory = path[0]
+                
+                f.write(file_contents)
+                f.close()
+                print(f" Text file saved. at {f.name}\n")
         
         
     def save_image(self, *_):
         """Saves all figures as a series of images in the directory that the user specifies."""
         if self.image_save_enabled:
             if self.network:
-                location = self.net_directory
                 title = "Select directory to save network and tree images"
             else:
-                location = self.trees_directory
                 title = "Select directory to save tree images"
             
-            directory = tkinter.filedialog.askdirectory(initialdir = location, title = title)
+            
+            directory = tkinter.filedialog.askdirectory(initialdir = self.save_directory, title = title)
             
             abs_path = os.path.dirname(__file__)
-            export_path = abs_path + directory 
+            export_path = abs_path + directory
 
             #Export network
-            if directory: #if dialog closed with "cancel".
+            if directory: #if dialog not closed with "cancel".
+                image_dpi = self.current_dpi * 2
                 print("\nSaving image(s)...")
                 
+                self.save_directory = export_path
+                
                 if self.network:
-                    self.net_fig.savefig(export_path + "/network.png", bbox_inches="tight")
+                    self.net_fig.savefig(export_path + "/network.png", dpi=image_dpi, format='png', bbox_inches='tight')
                 
                 if self.operation == "Create rSPR graph":
-                    self.graph_trees.figures[0].savefig(f"{abs_path}{directory}/rspr_graph.png", bbox_inches="tight")
+                    self.graph_trees.figures[0].savefig(f"{abs_path}{directory}/rspr_graph.png", dpi=image_dpi, format='png', bbox_inches='tight')
                     
                 else:
                     #Export trees
@@ -715,12 +751,11 @@ class Program(Tk):
                     
                     #count = 1
                     for i, tree_fig in enumerate(self.graph_trees.figures, start=1):
-                        tree_fig.savefig(f"{abs_path}{directory}/trees{str(i)}.png", bbox_inches="tight")
+                        tree_fig.savefig(f"{abs_path}{directory}/trees{str(i)}.png", dpi=image_dpi, format='png', bbox_inches='tight')
                         #count += 1
-                        print(f'\r {round(i / num_figures * 100)}% complete: Tree figures saved {i} / {num_figures}', end="\r", flush=True)
+                        print(f'\r {round(i / num_figures * 100)}% complete: Saved {i} / {num_figures} trees', end="\r", flush=True)
                     
-                    print()
-                print(" Complete: Image(s) saved.\n")
+                print(f" 100% complete: Image(s) saved at {export_path}.\n")
         
         
     def _exit(self):

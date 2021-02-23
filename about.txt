@@ -19,5 +19,6 @@ Release notes v2.0:
 - Fixed toolbar tooltips on Mac
 - Added progress indicator when generating and drawing graphs/trees
 - Made text in main window selectable on Mac
+- Added function to only save embedded tree string in text file
 
 Python 3.8.6

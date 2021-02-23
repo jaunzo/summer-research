@@ -56,6 +56,7 @@ class RsprGraph:
         trees_string : str
             String of all tree newick strings, each terminated by semicolon.
         """
+        print("\nChecking Newick trees...")
         input_trees = trees_string.translate(str.maketrans('', '', ' \n\t\r'))
         trees_array = input_trees.split(";")
         
@@ -65,14 +66,20 @@ class RsprGraph:
         self.tree_label_dict = {}
         self.valid_trees = []
         
+        total_trees = len(trees_array)
+        total_valid = 0
         for i, tree in enumerate(trees_array, start=1):
             try:
                 PhylogeneticNetwork(tree+";")
                 self.tree_label_dict[f"{tree};"] = f"t{i}"
                 self.valid_trees.append(f"{tree};")
+                total_valid += 1
             except MalformedNewickException:
                 self.tree_label_dict[f"{tree};"] = f"t{i}"
-        
+            
+            print(f'\r {round(i / total_trees * 100)}% complete: Trees checked {i} / {total_trees}', end="\r", flush=True)
+            
+        print(f" 100% complete: {total_valid}/{total_trees} trees are correctly formatted")
     
     @property
     def text(self):
@@ -98,7 +105,9 @@ class RsprGraph:
 
         number_nodes = self.graph.number_of_nodes()
         first_vertex = list(self.graph.nodes())[0]
+        print("\nFinding Hamiltonian cycle...")
         hamilton_path = RsprGraph.hamiltonian_cycle(self.graph, first_vertex, (), first_vertex, number_nodes)
+        print(" Cycle detection complete")
             
 
         if hamilton_path:
@@ -118,9 +127,11 @@ class RsprGraph:
 
     def spr_dense_graph(self):
         """Gets neighbours of a single tree"""
-        trees_string = ""
-        for tree in self.valid_trees:
-            trees_string += f"{tree}\n"
+#         trees_string = ""
+#         for tree in self.valid_trees:
+#             trees_string += f"{tree}\n"
+            
+        trees_string = "\n".join(self.valid_trees)
         
         if platform.system() == "Windows":
             file = resource_path("spr_dense_graph.exe")
@@ -152,7 +163,10 @@ class RsprGraph:
         output_lines = out.split()
         self.adjacency_dict = {}
         
-        for line in output_lines:
+        print("\nCreating adjacency list")
+        total_lines = len(output_lines)
+        for i, line in enumerate(output_lines):
+            
             array = line.split(",")
             
             node_index = int(array[0])
@@ -168,6 +182,10 @@ class RsprGraph:
                 self.adjacency_dict[node].append(neighbour)
             else:
                 self.adjacency_dict[node] = [neighbour]
+            
+            print(f'\r {round(i / total_lines * 100)}% complete: Processed {i} / {total_lines} lines', end="\r", flush=True)
+            
+        print(" 100% complete: rSPR graph adjacency list complete")
         
         
     def create_graph(self):
@@ -222,6 +240,7 @@ class RsprGraph:
             Returns cycle path if there is a hamiltonian cycle, else returns None
         """
         path += (current_vertex,)
+        
         
         #Base case
         if len(path)==num_nodes:

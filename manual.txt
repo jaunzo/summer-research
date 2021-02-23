@@ -72,7 +72,13 @@ SAVING
 -----------------------------------------------
 File -> Save as... -> Text file (Ctrl+Shift+T):
 -----------------------------------------------
-Saves the network and trees represented in Newick format in a text file.
+Saves the network and/or trees with other relevant information in a text file.
+
+
+------------------------------------------------------
+File -> Save as... -> Text file (trees only) (Ctrl+T):
+------------------------------------------------------
+Saves only embedded tree strings in a text file.
 
 
 --------------------------------------------

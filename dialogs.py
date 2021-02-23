@@ -208,10 +208,10 @@ class StringInputPrompt(Toplevel):
         
         
         except MalformedNewickException:
-            if not input_text or input_text == self.placeholder or input_text.count(";") < 2:
-                if self.is_network:
+            if not input_text or input_text == self.placeholder:
+                if self.operation == "Network":
                     error_text = "Please enter network"
-                else:
+                elif input_text.count(";") < 2:
                     error_text = "Please enter at least 2 trees"
                     
                 Label(self.error_message_frame,

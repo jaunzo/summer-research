@@ -126,7 +126,7 @@ class Network:
         """
         contents = f"NETWORK:\n{self._newick}\n\n"
         contents += f"Reticulations: {self.num_reticulations}\n"
-        contents += f"Network leaves:\n{self.labelled_leaves}\n"
+        contents += f"Network leaves:\n{', '.join(self.labelled_leaves)}\n"
         return contents
     
     @property
@@ -354,7 +354,7 @@ class EmbeddedTrees:
             String of tree leaves, total number of trees and number of distinct trees with their newick
             representation
         """
-        contents = f"\n\nTREES\nLeaves\n{self._selected_leaves}\n\nTotal trees: {self.network.total_trees}\nDistinct trees: {self.num_unique_trees}\n\n"
+        contents = f"\n\nTREES\nLeaves:\n{', '.join(self._selected_leaves)}\n\nTotal trees: {self.network.total_trees}\nDistinct trees: {self.num_unique_trees}\n\n"
         
         for tree, data in self.trees_data.items():
             contents += f"{tree}  x{data[0]}\n"
@@ -389,7 +389,7 @@ class EmbeddedTrees:
             self.trees_data[tree_newick].append(tree)
             print(f'\r {round(i / self.total_trees * 100)}% complete: Trees generated {i} / {self.total_trees}', end="\r", flush=True)
             
-        print(f" 100% complete: Generated all {self.total_trees} trees in network with {self.network.num_reticulations} reticulations.\n")
+        print(f" 100% complete: Generated all {self.total_trees} trees in network with {self.network.num_reticulations} reticulations\n")
     
     def remove_unselected_leaves(self, tree):
         """
@@ -490,7 +490,7 @@ class EmbeddedTrees:
             tree_count = self.trees_data[tree_newick][0]
             tree_ax.title.set_text(tree_count)
             
-        print(f" 100% complete: Drawn all {self.total_trees} trees from network with {self.network.num_reticulations} reticulations.\n")
+        print(f" 100% complete: Drawn all {self.total_trees} trees from network with {self.network.num_reticulations} reticulations\n")
             
 if __name__ == "__main__":
     net_newick = "(((1, (2) #H2), ((#H2, #H3))#H1), (#H1, ((3)#H3, 4)));"

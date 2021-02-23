@@ -334,7 +334,7 @@ class Trees:
                 
             print(f'\r {round(i / total_trees * 100)}% complete: Trees drawn {i} / {total_trees}', end="\r", flush=True)
         #plt.show()
-        print(f" 100% complete: Drawn all {total_trees} trees \n")
+        print(f" 100% complete: Drawn all {total_trees} trees\n")
         return self.figures
                 
     
