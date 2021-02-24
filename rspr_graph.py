@@ -205,11 +205,12 @@ class RsprGraph:
             
     def draw(self):
         """Draw graph on figure"""
-        print("\nDrawing rSPR graph...")
-        figure = plt.figure()
-        nx.draw(self.graph, node_color="#57f542", with_labels=True, ax=figure.gca())
-        self.figures = [figure]
-        print(" Completed drawing rSPR graph\n")
+        if not self.figures: #if there aren't any existing figures, draw them
+            print("\nDrawing rSPR graph...")
+            figure = plt.figure()
+            nx.draw(self.graph, node_color="#57f542", with_labels=True, ax=figure.gca())
+            self.figures = [figure]
+            print(" Completed drawing rSPR graph\n")
             
             
     @staticmethod

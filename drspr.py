@@ -302,39 +302,41 @@ class Trees:
         list[Figure]
             Array of figures where trees are drawn
         """
-        print("\nDrawing trees...")
-        total_trees = len(self.trees)
-        #Number of rows and cols per figure
-        #i.e rows * cols supbplots/trees per figure
-        rows = 1
-        cols = 2
         
-        for i, tree in enumerate(self.trees):
-            #Draw the output trees
-            #Display rows * cols trees per figure
-            plot_number = i % (rows * cols)
-            if plot_number == 0:
-                
-                #Close open figures
-                if close_figs:
-                    plt.close("all")
-                
-                #Create new figure
-                figure = plt.figure()
-                
-                #Add new figure
-                self.figures.append(figure)
-                
-                
-            if type(tree) != str:
-                tree_ax = figure.add_subplot(rows, cols, plot_number + 1)
-                tree_ax.title.set_text(f"t{i+1}")
-                
-                np.create_graph(tree, figure.gca())
-                
-            print(f'\r {round(i / total_trees * 100)}% complete: Trees drawn {i} / {total_trees}', end="\r", flush=True)
-        #plt.show()
-        print(f" 100% complete: Drawn all {total_trees} trees\n")
+        if not self.figures: #If there are no existing figures, draw them
+            print("\nDrawing trees...")
+            total_trees = len(self.trees)
+            #Number of rows and cols per figure
+            #i.e rows * cols supbplots/trees per figure
+            rows = 1
+            cols = 2
+            
+            for i, tree in enumerate(self.trees):
+                #Draw the output trees
+                #Display rows * cols trees per figure
+                plot_number = i % (rows * cols)
+                if plot_number == 0:
+                    
+                    #Close open figures
+                    if close_figs:
+                        plt.close("all")
+                    
+                    #Create new figure
+                    figure = plt.figure()
+                    
+                    #Add new figure
+                    self.figures.append(figure)
+                    
+                    
+                if type(tree) != str:
+                    tree_ax = figure.add_subplot(rows, cols, plot_number + 1)
+                    tree_ax.title.set_text(f"t{i+1}")
+                    
+                    np.create_graph(tree, figure.gca())
+                    
+                print(f'\r {round(i / total_trees * 100)}% complete: Trees drawn {i} / {total_trees}', end="\r", flush=True)
+            #plt.show()
+            print(f" 100% complete: Drawn all {total_trees} trees\n")
         return self.figures
                 
     

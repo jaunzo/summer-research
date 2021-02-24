@@ -326,7 +326,7 @@ class EmbeddedTrees:
         
         Returns
         -------
-        list[Figure]
+        tuple[Figure]
             Array of figures where trees are drawn
         """
         return self.tree_figs
@@ -448,50 +448,54 @@ class EmbeddedTrees:
             Logic to close tree figures that are drawn (default is True). False if you want to use matplotlib's
             figure interface instead of phyloprogram front end.
         """
-        print("\nDrawing trees...")
-        tree_axes = {} #Dictionary of unique tree newicks with plot axes
-        unique_plot_count = 1
         
-        unique_trees_fig = plt.figure()
-        self.tree_figs.append(unique_trees_fig)
-        
-        rows = 1
-        cols = 2
-        
-        for i, (tree_newick, data) in enumerate(self.trees_data.items()):
-            #Draw the output trees
-            #Display rows * cols trees per figure
-            if unique_plot_count > rows * cols:
-                
-                unique_plot_count = 1
-                
-                #Close open figures to save memory
-                if close_figs:
-                    plt.close("all") #Comment this line if you want to show all figures through matplotlib's figure manager
-                
-                #Create new figure
-                unique_trees_fig = plt.figure()
-                
-                #Add new figure
-                self.tree_figs.append(unique_trees_fig)
-                
-            tree_ax = unique_trees_fig.add_subplot(rows, cols, unique_plot_count)
+        if not self.tree_figs: #If figures have not been created, draw them
+            print("\nDrawing trees...")
+            tree_axes = {} #Dictionary of unique tree newicks with plot axes
+            unique_plot_count = 1
             
-            #Store ax subplots to title later
-            tree_axes[tree_newick] = tree_ax
+            unique_trees_fig = plt.figure()
+            self.tree_figs.append(unique_trees_fig)
             
-            create_graph(data[1], unique_trees_fig.gca())
-            unique_plot_count += 1
-            print(f'\r {round(i / self.total_trees * 100)}% complete: Trees drawn {i} / {self.total_trees}', end="\r", flush=True)
+            rows = 1
+            cols = 2
+            
+            for i, (tree_newick, data) in enumerate(self.trees_data.items()):
+                #Draw the output trees
+                #Display rows * cols trees per figure
+                if unique_plot_count > rows * cols:
+                    
+                    unique_plot_count = 1
+                    
+                    #Close open figures to save memory
+                    if close_figs:
+                        plt.close("all") #Comment this line if you want to show all figures through matplotlib's figure manager
+                    
+                    #Create new figure
+                    unique_trees_fig = plt.figure()
+                    
+                    #Add new figure
+                    self.tree_figs.append(unique_trees_fig)
+                    
+                tree_ax = unique_trees_fig.add_subplot(rows, cols, unique_plot_count)
                 
-        #Add number of occurences as the title above each subplot
-        for tree_newick in self.trees_data.keys():
-            tree_ax = tree_axes[tree_newick]
-            tree_count = self.trees_data[tree_newick][0]
-            tree_ax.title.set_text(tree_count)
-            
-        print(f" 100% complete: Drawn all {self.total_trees} trees from network with {self.network.num_reticulations} reticulations\n")
-            
+                #Store ax subplots to title later
+                tree_axes[tree_newick] = tree_ax
+                
+                create_graph(data[1], unique_trees_fig.gca())
+                unique_plot_count += 1
+                print(f'\r {round(i / self.total_trees * 100)}% complete: Trees drawn {i} / {self.total_trees}', end="\r", flush=True)
+                    
+            #Add number of occurences as the title above each subplot
+            for tree_newick in self.trees_data.keys():
+                tree_ax = tree_axes[tree_newick]
+                tree_count = self.trees_data[tree_newick][0]
+                tree_ax.title.set_text(tree_count)
+                
+            self.tree_figs = tuple(self.tree_figs)
+                
+            print(f" 100% complete: Drawn all {self.total_trees} trees from network with {self.network.num_reticulations} reticulations\n")
+                
 if __name__ == "__main__":
     net_newick = "(((1, (2) #H2), ((#H2, #H3))#H1), (#H1, ((3)#H3, 4)));"
     figure = plt.figure("Network")

@@ -448,8 +448,6 @@ class Program(Tk):
             
             if not self.graphics:
                 self.print_trees()
-#             else:
-#                 self.graph_trees.draw()
                 
         if self.graphics:
             self.graph_trees.draw()
@@ -858,7 +856,8 @@ class GraphWindow(Window):
         self.protocol("WM_DELETE_WINDOW", self._exit)
         self.operation = operation
         self.graph_trees = graph_trees
-        
+        self.figures_frame = None
+
         self.scroll_setup()
         self._initialise_info_bar()
         self.display_figures()
@@ -867,8 +866,13 @@ class GraphWindow(Window):
     def display_figures(self):
         """Display the figures from the Trees object."""
         self.canvases = []
+
+        if self.figures_frame == None:
+            self.figures_frame = Frame(self.frame)
+            self.figures_frame.pack(fill="both", expand=1)
+
         for fig in self.graph_trees.figures:
-            trees_canvas = FigureCanvasTkAgg(fig, master=self.frame)
+            trees_canvas = FigureCanvasTkAgg(fig, master=self.figures_frame)
             trees_canvas.get_tk_widget().pack(side="top", fill="both", expand=1)
             self.canvases.append(trees_canvas)
             
@@ -877,7 +881,6 @@ class GraphWindow(Window):
         
         #Update number of unique trees
         self._update_info_bar()
-            
         
         
     def _update_info_bar(self):
@@ -908,9 +911,17 @@ class GraphWindow(Window):
             
     def clear_figures(self):
         """Remove the figures currently displayed in the GraphWindow."""
-        for canvas in self.canvases:
-            canvas.get_tk_widget().pack_forget()
-            canvas.get_tk_widget().destroy()
+
+#         for canvas in self.canvases:
+#             canvas.get_tk_widget().pack_forget()
+#             canvas.get_tk_widget().delete("all")
+
+#         for widget in self.frame.winfo_children():
+#             widget.delete("all")
+#             widget.destroy()
+
+        self.figures_frame.destroy()
+        self.figures_frame = None
             
             
     def replace_graph(self, new_graph_trees, operation):
