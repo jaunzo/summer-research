@@ -170,7 +170,7 @@ class Program(Tk):
         
         self.draw_button = HoverButton(self.toolbar, text ="Draw trees/graph", relief="raised",
                                                 command=self.generate_trees_graph, state="disabled",
-                                                tooltip_text="Draw trees or graph")
+                                                tooltip_text="Draw embedded/input trees or rSPR graph")
         
         self.graphics_enabled = IntVar()
         self.graphics = False
