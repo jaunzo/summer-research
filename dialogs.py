@@ -197,6 +197,9 @@ class StringInputPrompt(Toplevel):
         input_text = self.text_entry.get("1.0", "end").strip()
         
         try:
+            if input_text == self.placeholder:
+                raise MalformedNewickException
+            
             if self.operation == "Network":
                 self.main.generate_network(input_text)
             elif self.operation == "Calculate drSPR":
@@ -211,7 +214,7 @@ class StringInputPrompt(Toplevel):
             if not input_text or input_text == self.placeholder:
                 if self.operation == "Network":
                     error_text = "Please enter network"
-                elif input_text.count(";") < 2:
+                else:
                     error_text = "Please enter at least 2 trees"
                     
                 Label(self.error_message_frame,

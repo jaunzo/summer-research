@@ -942,5 +942,6 @@ class GraphWindow(Window):
         
 
 if __name__ == "__main__":
+    print("PhyloProgram version 2.0")
     program = Program()
     program.mainloop()
