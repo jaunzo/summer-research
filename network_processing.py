@@ -505,6 +505,7 @@ if __name__ == "__main__":
     print(network.text)
     
     trees = network.process()
+    #Requires Graphviz installed
     trees.draw(False)
     print(trees.text)
     

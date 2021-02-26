@@ -422,7 +422,6 @@ class Program(Tk):
         
         if self.graph_window:
             self.graph_window.withdraw()
-            
         
         self.net_fig.gca().clear()
         
@@ -430,14 +429,25 @@ class Program(Tk):
             self.network.draw()
             self.net_canvas.draw()
         except (ValueError, ImportError) as e:
-            self.net_fig.clear()
-            self.net_canvas.get_tk_widget().pack_forget()
+            if self.net_fig:
+                self.net_fig.clear()
+                self.net_canvas.get_tk_widget().pack_forget()
+                self.main_text_widget.pack(expand=True, fill="both")
             
-            error_message = f"Error: {e}\n\nGraphviz must be installed and it's executables must be in the system's PATH."
+            error_message = f"Error: {e}\n\nTo draw networks and trees, Graphviz must be installed and it's executables must be in the system's PATH."
             tkinter.messagebox.showerror(title="Open network error", message=error_message)
             
             self.graphics_enabled.set(0)
             self.graphics = False
+            self._disable_tree_tools()
+            
+            
+            self.main_text_widget.config(state="normal")
+            self.main_text_widget.delete('1.0', "end")
+            self.main_text_widget.insert("1.0", "Error drawing network.\n\nGraphviz must be installed and it's executables must be in the system's PATH.\n")
+            self.main_text_widget.insert("end", "Check Github page for more information. \nGithub page can be accessed in Help -> More info.\n\n")
+            self.main_text_widget.insert("end", "Please enter network again with graphics disabled or install Graphviz if you \nwould like to proceed with graph visualisation.")
+            self.main_text_widget.config(state="disabled")
         
         
     def generate_trees_graph(self):
@@ -450,8 +460,17 @@ class Program(Tk):
                 self.print_trees()
                 
         if self.graphics:
-            self.graph_trees.draw()
-            self.display_trees_graph()
+            try:
+                self.graph_trees.draw()
+                self.display_trees_graph()
+            except (ValueError, ImportError) as e:
+                error_message = f"Error: {e}\n\nTo draw networks and trees, Graphviz must be installed and it's executables must be in the system's PATH."
+                tkinter.messagebox.showerror(title="Draw error", message=error_message)
+                print(" Draw error: Graphviz must be installed to be able to draw graphs\n")
+                
+                self.graphics_enabled.set(0)
+                self.graphics = False
+                self._disable_tree_tools()
 
         
     def print_trees(self):

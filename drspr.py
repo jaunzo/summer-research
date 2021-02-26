@@ -77,7 +77,6 @@ def rspr(tree1, tree2):
     if err:
         print(err)
         print("Error occured in rspr")
-        
     
     length = len(output_list)
 
@@ -383,6 +382,7 @@ if __name__ == "__main__":
             print()
             
     #Draw trees
+    #Requires Graphviz
     figures = trees_obj.draw(False)
     plt.show()
     
