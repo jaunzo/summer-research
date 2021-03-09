@@ -79,3 +79,14 @@ network contains less than 10 reticulations and/or 15-20 leaves.
 This program uses cwhidden's [rspr](https://github.com/cwhidden/rspr) and [spr_neighbors](https://github.com/cwhidden/spr_neighbors) software packages.
 
 ## 
+
+
+&nbsp;
+## Contact
+Janine Aunzo
+
+jaun281@aucklanduni.ac.nz
+
+jabaunzo@gmail.com
+
+## 
