@@ -18,6 +18,17 @@ from widgets import ToolTip
 import drspr as d
 from rspr_graph import RsprGraph
 
+# def executable_path():
+#     if getattr(sys, 'frozen', False):
+#         #application_path = sys._MEIPASS
+#         application_path = os.path.sep.join(sys.argv[0].split(os.path.sep)[:-1])
+#     else:
+#         print("else")
+#         application_path = os.path.dirname(os.path.abspath(__file__))
+#         
+#     print("Executable path")
+#     print(application_path)
+
 def resource_path(relative_path):
     """
     Get absolute path to resource, works for dev and for PyInstaller
@@ -35,10 +46,13 @@ def resource_path(relative_path):
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = sys._MEIPASS
+        print(os.path.abspath("."))
     except Exception:
-        base_path = os.environ.get("_MEIPASS2",os.path.abspath("."))
+        base_path = os.path.abspath(".")
 
-    return os.path.join(base_path, relative_path)
+    path = os.path.join(base_path, relative_path)
+    print(path)
+    return path
 
 class Program(Tk):
     """
@@ -85,6 +99,14 @@ class Program(Tk):
         self.net_canvas = FigureCanvasTkAgg(self.net_fig, master=self.main_frame)
         
         self._initialise_main_text_widget()
+#         self.current_path = os.path.abspath(".")
+#         self.temp_path = sys._MEIPASS
+#         
+#         print(self.current_path)
+#         print(self.temp_path)
+        print(sys.executable)
+        resource_path("")
+        
         
     def _get_dpi(self):
         """

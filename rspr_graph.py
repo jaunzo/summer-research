@@ -4,11 +4,20 @@ Module that calculates spr neighbours
 Source code for spr_dense_graph executable:
 https://github.com/cwhidden/spr_neighbors
 """
+#!/usr/bin/python3
 import platform, sys, os, subprocess
 from subprocess import PIPE, Popen
 import networkx as nx
 import matplotlib.pyplot as plt
 from phylonetwork import MalformedNewickException, PhylogeneticNetwork
+    
+# def executable_path():
+#     if getattr(sys, 'frozen', False):
+#         application_path = sys._MEIPASS
+#     else:
+#         application_path = os.path.dirname(os.path.abspath(__file__))
+#         
+#     print(application_path)
     
 def resource_path(relative_path):
     """
@@ -27,10 +36,15 @@ def resource_path(relative_path):
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = sys._MEIPASS
+        raise Exception
     except Exception:
+        print("# Pyinstaller temp folder not found")
         base_path = os.environ.get("_MEIPASS2",os.path.abspath("."))
-
-    return os.path.join(base_path, relative_path)
+        #base_path = os.path.abspath(".")
+        
+    path = os.path.join(base_path, relative_path)
+    print(path)
+    return path
     
 class RsprGraph:
     """Class for creating rspr graph"""
@@ -41,6 +55,7 @@ class RsprGraph:
         trees_string : str
             String of all tree newick strings, each terminated by semicolon.
         """
+        print(sys.executable)
         self.check_validity(trees_string)
         self.spr_dense_graph()
         
