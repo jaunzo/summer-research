@@ -89,21 +89,15 @@ class Program(Tk):
         self.net_canvas = FigureCanvasTkAgg(self.net_fig, master=self.main_frame)
         
         self._initialise_main_text_widget()
-        print(sys.executable)
         
         try:
             # PyInstaller creates a temp folder and stores path in _MEIPASS
             base_path = sys._MEIPASS
             print(f"PyInstaller temp folder: {base_path}")
+            print(f"The PyInstaller temp folder can be deleted")
+            
         except:
-            if getattr(sys, 'frozen', False):
-                #Get executable path
-                executable_path = sys.executable
-                base_path = os.path.split(executable_path)[0]
-            else:
-                base_path = os.path.dirname(os.path.abspath(__file__))
-                
-        print(base_path)
+            pass
         
     def _get_dpi(self):
         """
@@ -991,6 +985,7 @@ class GraphWindow(Window):
         
 
 if __name__ == "__main__":
-    print("PhyloProgram version 2.0")
+    print(f"Running executable: {sys.executable}\n")
+    print("PhyloProgram version 2.0\n")
     program = Program()
     program.mainloop()
