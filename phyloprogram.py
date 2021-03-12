@@ -17,42 +17,32 @@ from dialogs import (MultiChoicePrompt, StringInputPrompt)
 from widgets import ToolTip
 import drspr as d
 from rspr_graph import RsprGraph
+import path
 
-# def executable_path():
-#     if getattr(sys, 'frozen', False):
-#         #application_path = sys._MEIPASS
-#         application_path = os.path.sep.join(sys.argv[0].split(os.path.sep)[:-1])
-#     else:
-#         print("else")
-#         application_path = os.path.dirname(os.path.abspath(__file__))
+# def resource_path(relative_path):
+#     """
+#     Get absolute path to resource, works for dev and for PyInstaller
+#     
+#     Parameters
+#     ----------
+#     relative_path : str
+#         Relative path to file from script's location
 #         
-#     print("Executable path")
-#     print(application_path)
-
-def resource_path(relative_path):
-    """
-    Get absolute path to resource, works for dev and for PyInstaller
-    
-    Parameters
-    ----------
-    relative_path : str
-        Relative path to file from script's location
-        
-    Returns
-    -------
-    str
-        Absolute path to file
-    """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-        print(os.path.abspath("."))
-    except Exception:
-        base_path = os.path.abspath(".")
-
-    path = os.path.join(base_path, relative_path)
-    print(path)
-    return path
+#     Returns
+#     -------
+#     str
+#         Absolute path to file
+#     """
+#     try:
+#         # PyInstaller creates a temp folder and stores path in _MEIPASS
+#         base_path = sys._MEIPASS
+#         print(os.path.abspath("."))
+#     except Exception:
+#         base_path = os.path.abspath(".")
+# 
+#     path = os.path.join(base_path, relative_path)
+#     print(path)
+#     return path
 
 class Program(Tk):
     """
@@ -99,14 +89,21 @@ class Program(Tk):
         self.net_canvas = FigureCanvasTkAgg(self.net_fig, master=self.main_frame)
         
         self._initialise_main_text_widget()
-#         self.current_path = os.path.abspath(".")
-#         self.temp_path = sys._MEIPASS
-#         
-#         print(self.current_path)
-#         print(self.temp_path)
         print(sys.executable)
-        resource_path("")
         
+        try:
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            base_path = sys._MEIPASS
+            print(f"PyInstaller temp folder: {base_path}")
+        except:
+            if getattr(sys, 'frozen', False):
+                #Get executable path
+                executable_path = sys.executable
+                base_path = os.path.split(executable_path)[0]
+            else:
+                base_path = os.path.dirname(os.path.abspath(__file__))
+                
+        print(base_path)
         
     def _get_dpi(self):
         """
@@ -333,7 +330,7 @@ class Program(Tk):
     def about(self):
         """Display overview of program in window"""
         self.about_window = Window(title="About")
-        path_file = resource_path("about.txt")
+        path_file = path.resource_path("about.txt")
         f = open(path_file, "r")
         about_text = f.read()
         text_widget = Text(self.about_window)
@@ -345,7 +342,7 @@ class Program(Tk):
         """Display program manual in window"""
         self.manual_window = Window(title="Manual", width=self.scaled_width,
                                     height=self.scaled_height//2)
-        path_file = resource_path("manual.txt")
+        path_file = path.resource_path("manual.txt")
         f = open(path_file, "r")
         manual_text = f.read()
         text_widget = Text(self.manual_window, width=30)
@@ -575,7 +572,7 @@ class Program(Tk):
                     self.get_drspr(text, text_file)
                 except MalformedNewickException:
                     error_message = "Could not read trees.\n\Trees must contain at least one labelled leaf and trees must terminate with semicolon."
-                    tkinter.messagebox.showerror(title="Open network error", message=error_message)
+                    tkinter.messagebox.showerror(title="Open trees error", message=error_message)
             elif text != None and self.operation == "Create rSPR graph":
                 self.get_rspr_graph(text, text_file)
                     

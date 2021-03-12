@@ -4,47 +4,13 @@ Module that calculates spr neighbours
 Source code for spr_dense_graph executable:
 https://github.com/cwhidden/spr_neighbors
 """
-#!/usr/bin/python3
+
 import platform, sys, os, subprocess
 from subprocess import PIPE, Popen
 import networkx as nx
 import matplotlib.pyplot as plt
 from phylonetwork import MalformedNewickException, PhylogeneticNetwork
-    
-# def executable_path():
-#     if getattr(sys, 'frozen', False):
-#         application_path = sys._MEIPASS
-#     else:
-#         application_path = os.path.dirname(os.path.abspath(__file__))
-#         
-#     print(application_path)
-    
-def resource_path(relative_path):
-    """
-    Get absolute path to resource, works for dev and for PyInstaller
-    
-    Parameters
-    ----------
-    relative_path : str
-        Relative path to file from script's location
-        
-    Returns
-    -------
-    str
-        Absolute path to file
-    """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-        raise Exception
-    except Exception:
-        print("# Pyinstaller temp folder not found")
-        base_path = os.environ.get("_MEIPASS2",os.path.abspath("."))
-        #base_path = os.path.abspath(".")
-        
-    path = os.path.join(base_path, relative_path)
-    print(path)
-    return path
+import path
     
 class RsprGraph:
     """Class for creating rspr graph"""
@@ -55,7 +21,7 @@ class RsprGraph:
         trees_string : str
             String of all tree newick strings, each terminated by semicolon.
         """
-        print(sys.executable)
+        
         self.check_validity(trees_string)
         self.spr_dense_graph()
         
@@ -142,14 +108,10 @@ class RsprGraph:
 
     def spr_dense_graph(self):
         """Gets neighbours of a single tree"""
-#         trees_string = ""
-#         for tree in self.valid_trees:
-#             trees_string += f"{tree}\n"
-            
         trees_string = "\n".join(self.valid_trees)
         
         if platform.system() == "Windows":
-            file = resource_path("spr_dense_graph.exe")
+            file = path.resource_path("spr_dense_graph.exe")
             executable = Popen(executable=file, args="", stdin=PIPE,
                                    stdout=PIPE, stderr=PIPE,
                                    universal_newlines=True, shell=True)
@@ -160,7 +122,7 @@ class RsprGraph:
             executable.kill()
             
         else:
-            file = resource_path("spr_dense_graph")
+            file = path.resource_path("spr_dense_graph")
             executable = subprocess.run(file, stdout=PIPE, stderr=PIPE,
                                         input=trees_string.encode("utf-8"),
                                         shell=True)

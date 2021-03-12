@@ -10,28 +10,29 @@ from subprocess import PIPE, Popen
 from phylonetwork import MalformedNewickException, PhylogeneticNetwork
 import network_processing as np
 import matplotlib.pyplot as plt
+import path
 
-def resource_path(relative_path):
-    """
-    Get absolute path to resource, works for dev and for PyInstaller
-    
-    Parameters
-    ----------
-    relative_path : str
-        Relative path to file from script's location
-        
-    Returns
-    -------
-    str
-        Absolute path to file
-    """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.environ.get("_MEIPASS2",os.path.abspath("."))
-
-    return os.path.join(base_path, relative_path)
+# def resource_path(relative_path):
+#     """
+#     Get absolute path to resource, works for dev and for PyInstaller
+#     
+#     Parameters
+#     ----------
+#     relative_path : str
+#         Relative path to file from script's location
+#         
+#     Returns
+#     -------
+#     str
+#         Absolute path to file
+#     """
+#     try:
+#         # PyInstaller creates a temp folder and stores path in _MEIPASS
+#         base_path = sys._MEIPASS
+#     except Exception:
+#         base_path = os.environ.get("_MEIPASS2",os.path.abspath("."))
+# 
+#     return os.path.join(base_path, relative_path)
 
 def rspr(tree1, tree2):
     """
@@ -52,7 +53,7 @@ def rspr(tree1, tree2):
     input_string = tree1 + "\n" + tree2
     
     if platform.system() == "Windows":
-        file = resource_path("rspr.exe")
+        file = path.resource_path("rspr.exe")
         executable = Popen(executable=file, args="", stdin=PIPE,
                                stdout=PIPE, stderr=PIPE,
                                universal_newlines=True, shell=True)
@@ -63,7 +64,7 @@ def rspr(tree1, tree2):
         executable.kill()
         
     else:
-        file = resource_path("rspr")
+        file = path.resource_path("rspr")
         executable = subprocess.run(file, stdout=PIPE, stderr=PIPE,
                                     input=input_string.encode("utf-8"),
                                     shell=True)
