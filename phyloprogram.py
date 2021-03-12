@@ -571,7 +571,7 @@ class Program(Tk):
                 try:
                     self.get_drspr(text, text_file)
                 except MalformedNewickException:
-                    error_message = "Could not read trees.\n\Trees must contain at least one labelled leaf and trees must terminate with semicolon."
+                    error_message = "Could not read trees.\n\nPlease enter at least 2 trees.\nTrees must contain at least one labelled leaf and trees must terminate with semicolon."
                     tkinter.messagebox.showerror(title="Open trees error", message=error_message)
             elif text != None and self.operation == "Create rSPR graph":
                 self.get_rspr_graph(text, text_file)
