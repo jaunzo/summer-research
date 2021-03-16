@@ -12,27 +12,6 @@ import network_processing as np
 import matplotlib.pyplot as plt
 import path
 
-# def resource_path(relative_path):
-#     """
-#     Get absolute path to resource, works for dev and for PyInstaller
-#     
-#     Parameters
-#     ----------
-#     relative_path : str
-#         Relative path to file from script's location
-#         
-#     Returns
-#     -------
-#     str
-#         Absolute path to file
-#     """
-#     try:
-#         # PyInstaller creates a temp folder and stores path in _MEIPASS
-#         base_path = sys._MEIPASS
-#     except Exception:
-#         base_path = os.environ.get("_MEIPASS2",os.path.abspath("."))
-# 
-#     return os.path.join(base_path, relative_path)
 
 def rspr(tree1, tree2):
     """
@@ -125,6 +104,9 @@ def rspr_pairwise(trees):
     
     compare_count = 1
     
+    file = path.resource_path("rspr.exe")
+    print(f" Opening file at {file}")
+    
     for i in range(len(trees)):
         for j in range(i, len(trees)):
             try:
@@ -203,6 +185,8 @@ def calculate_drspr(trees):
                 return(["X"], ["Error occured. Tree(s) contain unlabelled leaves. Make sure all leaves are labelled."], Trees(trees_array))
                 
             elif t1_leaves == t2_leaves:
+                file = path.resource_path("rspr.exe")
+                print(f" Opening file at {file}")
                 (distances, clusters) = rspr(trees_array[0].eNewick(), trees_array[1].eNewick())
             
             else:

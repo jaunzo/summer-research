@@ -25,5 +25,4 @@ def resource_path(relative_path):
         
     path = os.path.join(base_path, relative_path)
     
-    print(f"\nOpening file at {path}")
     return path

@@ -132,6 +132,8 @@ class RsprGraph:
         
         out = out.strip()
         
+        print(f"\nOpening file at {file}")
+        
         if err:
             print(err)
             print("Error occured in spr_dense_graph")

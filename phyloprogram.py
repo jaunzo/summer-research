@@ -9,40 +9,30 @@ from tkinter import (Tk, Canvas, Scrollbar, Menu, Toplevel,
                      Frame, Label, Text, IntVar, Checkbutton)
 from network_processing import Network
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import sys, os, platform, webbrowser
+import sys, os, platform, webbrowser, time, path, glob, drspr as d
 import matplotlib.pyplot as plt
 from widgets import HoverButton
 from phylonetwork import MalformedNewickException
 from dialogs import (MultiChoicePrompt, StringInputPrompt)
 from widgets import ToolTip
-import drspr as d
 from rspr_graph import RsprGraph
-import path
+from shutil import rmtree
 
-# def resource_path(relative_path):
-#     """
-#     Get absolute path to resource, works for dev and for PyInstaller
-#     
-#     Parameters
-#     ----------
-#     relative_path : str
-#         Relative path to file from script's location
-#         
-#     Returns
-#     -------
-#     str
-#         Absolute path to file
-#     """
-#     try:
-#         # PyInstaller creates a temp folder and stores path in _MEIPASS
-#         base_path = sys._MEIPASS
-#         print(os.path.abspath("."))
-#     except Exception:
-#         base_path = os.path.abspath(".")
-# 
-#     path = os.path.join(base_path, relative_path)
-#     print(path)
-#     return path
+def deleteOldPyinstallerFolders(time_threshold = 3600): # Default setting: Remove after 1 hour, time_threshold in seconds
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        return  # Not being ran as OneFile Folder -> Return
+
+    temp_path = os.path.abspath(os.path.join(base_path, '..')) # Go to parent folder of MEIPASS
+
+    # Search all MEIPASS folders...
+    mei_folders = glob.glob(os.path.join(temp_path, '_MEI*'))
+    for item in mei_folders:
+        if (time.time()-os.path.getctime(item)) > time_threshold:
+            rmtree(item)
+            
+    print("Deleted temp folders from older sessions\n")
 
 class Program(Tk):
     """
@@ -98,6 +88,9 @@ class Program(Tk):
             
         except:
             pass
+        
+        
+        
         
     def _get_dpi(self):
         """
@@ -795,7 +788,7 @@ class Program(Tk):
         MsgBox = tk.messagebox.askquestion ("Exit Application","Are you sure you want to exit the application?",
                                             icon = "warning")
         if MsgBox == "yes":
-            sys.exit(0)
+            os._exit(0)
             
 
 class Window(Toplevel):
@@ -987,5 +980,6 @@ class GraphWindow(Window):
 if __name__ == "__main__":
     print(f"Running executable: {sys.executable}\n")
     print("PhyloProgram version 2.0\n")
+    deleteOldPyinstallerFolders()
     program = Program()
     program.mainloop()
