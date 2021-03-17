@@ -16,11 +16,15 @@ def resource_path(relative_path):
     str
         Absolute path to file
     """
-    if getattr(sys, 'frozen', False):
-        #Get directory where executable is located
-        executable_path = sys.executable
-        base_path = os.path.split(executable_path)[0]
-    else:
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+#         if getattr(sys, 'frozen', False):
+#             #Get directory where executable is located
+#             executable_path = sys.executable
+#             base_path = os.path.split(executable_path)[0]
+#         else:
         base_path = os.path.dirname(os.path.abspath(__file__))
         
     path = os.path.join(base_path, relative_path)
