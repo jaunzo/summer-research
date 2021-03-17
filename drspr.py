@@ -111,7 +111,7 @@ def rspr_pairwise(trees):
     for i in range(len(trees)):
         for j in range(i, len(trees)):
             try:
-                print(f'\r {round(compare_count / num_comparisons*100)}% complete: Calculating between t{i+1} and t{j+1}', end="\r", flush=True)
+                
                 compare_count += 1
                 t1 = Tree(trees[i] + ";", f"t{i+1}")
                 t2 = Tree(trees[j] + ";", f"t{j+1}")
@@ -135,11 +135,13 @@ def rspr_pairwise(trees):
                     distance_array[i][j] = "X"
                     clusters_array[i][j] = [f"Error occured. Trees don't have same taxa set. Missing taxa: {', '.join(missing_leaves)}"]
                 
+                print(f'\r {round(compare_count / num_comparisons*100)}% complete: Calculating between t{i+1} and t{j+1}', end="\r", flush=True)
+                
             except MalformedNewickException:
                 distance_array[i][j] = "X"
                 clusters_array[i][j] = ["Error occured. Check tree newick string."]
 
-    print(f'\r 100% complete: pairwise distance calculated for {len(trees)} trees\n', end="\r")
+    print(f'\r 100% complete: pairwise distance calculated for {len(trees)} trees\n')
     return (distance_array, clusters_array, trees_array)
 
 def calculate_drspr(trees):

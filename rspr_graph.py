@@ -88,7 +88,7 @@ class RsprGraph:
         first_vertex = list(self.graph.nodes())[0]
         print("\nFinding Hamiltonian cycle...")
         hamilton_path = RsprGraph.hamiltonian_cycle(self.graph, first_vertex, (), first_vertex, number_nodes)
-        print(" Cycle detection complete")
+        print(" Cycle detection complete\n")
             
 
         if hamilton_path:
@@ -190,7 +190,7 @@ class RsprGraph:
             figure = plt.figure()
             nx.draw(self.graph, node_color="#57f542", with_labels=True, ax=figure.gca())
             self.figures = [figure]
-            print(" Completed drawing rSPR graph\n")
+            print(" Completed drawing rSPR graph")
             
             
     @staticmethod
