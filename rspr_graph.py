@@ -123,6 +123,7 @@ class RsprGraph:
             
         else:
             file = path.resource_path("spr_dense_graph")
+            file = file.replace(" ", "\ ")
             executable = subprocess.run(file, stdout=PIPE, stderr=PIPE,
                                         input=trees_string.encode("utf-8"),
                                         shell=True)

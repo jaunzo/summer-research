@@ -44,6 +44,7 @@ def rspr(tree1, tree2):
         
     else:
         file = path.resource_path("rspr")
+        file = file.replace(" ", "\ ")
         executable = subprocess.run(file, stdout=PIPE, stderr=PIPE,
                                     input=input_string.encode("utf-8"),
                                     shell=True)
