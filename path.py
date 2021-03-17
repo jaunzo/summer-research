@@ -19,7 +19,8 @@ def resource_path(relative_path):
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = sys._MEIPASS
-    except Exception:
+    except Exception as e:
+        print(e)
         if getattr(sys, 'frozen', False):
             #Get directory where executable is located
             executable_path = sys.executable
