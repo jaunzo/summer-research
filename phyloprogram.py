@@ -84,7 +84,7 @@ class Program(Tk):
             # PyInstaller creates a temp folder and stores path in _MEIPASS
             base_path = sys._MEIPASS
             print(f"PyInstaller temp folder: {base_path}")
-            print(f"The PyInstaller temp folder can be deleted")
+            print(f"The PyInstaller temp folder can be deleted after session is closed")
             
         except:
             pass
