@@ -1,4 +1,4 @@
-Version 2.0
+Version 2.1
 
 This program can generate embedded trees from a small, binary, phylogenetic 
 network, calculate rooted subtree prune and regraft distance (drSPR) and 
@@ -6,19 +6,8 @@ create an rSPR graph from a small set of trees.
 
 Graphviz must be installed to enable graph visualisation.
 
-Release notes v2.0:
-- Added rSPR graph functionality
-- Added drSPR functionality
-- Changed toolbar button "Show trees" to "Draw graph/trees"
-- To generate embedded trees from a network, user must now click on "Select 
-  leaves" as "Show trees" button is no longer available.
-- Fixed bug that showed duplicate trees with graphics enabled when trees window 
-  is closed and immediately opened again by clicking "Draw graph/trees" button
-- Fixed multiple error messages showing on "Select leaves" window when making 
-  an error twice in a row
-- Fixed toolbar tooltips on Mac
-- Added progress indicator when generating and drawing graphs/trees
-- Made text in main window selectable on Mac
-- Added function to only save embedded tree string in text file
+Release notes v2.1:
+- Changed pathing to resource files and moved all external files to the dist folder
+- Program deletes old Pyinstaller temp folders (_MEI*** folders) that are over 1 hour old
 
 Python 3.8.6
