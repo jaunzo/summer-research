@@ -318,6 +318,7 @@ class Program(Tk):
         """Display overview of program in window"""
         self.about_window = Window(title="About")
         path_file = path.resource_path("about.txt")
+        print(f" Opened file at {path_file}")
         f = open(path_file, "r")
         about_text = f.read()
         text_widget = Text(self.about_window)
@@ -330,6 +331,7 @@ class Program(Tk):
         self.manual_window = Window(title="Manual", width=self.scaled_width,
                                     height=self.scaled_height//2)
         path_file = path.resource_path("manual.txt")
+        print(f" Opened file at {path_file}")
         f = open(path_file, "r")
         manual_text = f.read()
         text_widget = Text(self.manual_window, width=30)
