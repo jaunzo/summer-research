@@ -980,8 +980,8 @@ class GraphWindow(Window):
         
 
 if __name__ == "__main__":
+    print("\nPhyloProgram version 2.0\n")
     print(f"Running executable: {sys.executable}\n")
-    print("PhyloProgram version 2.0\n")
     deleteOldPyinstallerFolders()
     program = Program()
     program.mainloop()
