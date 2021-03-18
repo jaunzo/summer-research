@@ -84,12 +84,10 @@ class Program(Tk):
             # PyInstaller creates a temp folder and stores path in _MEIPASS
             base_path = sys._MEIPASS
             print(f"PyInstaller temp folder: {base_path}")
-            print(f"The PyInstaller temp folder can be deleted after session is closed")
+            print(f"The PyInstaller temp folder can be deleted after session is closed\n")
             
         except:
-            pass
-        
-        
+            pass  
         
         
     def _get_dpi(self):
@@ -938,15 +936,6 @@ class GraphWindow(Window):
             
     def clear_figures(self):
         """Remove the figures currently displayed in the GraphWindow."""
-
-#         for canvas in self.canvases:
-#             canvas.get_tk_widget().pack_forget()
-#             canvas.get_tk_widget().delete("all")
-
-#         for widget in self.frame.winfo_children():
-#             widget.delete("all")
-#             widget.destroy()
-
         self.figures_frame.destroy()
         self.figures_frame = None
             
@@ -980,7 +969,7 @@ class GraphWindow(Window):
         
 
 if __name__ == "__main__":
-    print("\nPhyloProgram version 2.0\n")
+    print("\nPhyloProgram version 2.1\n")
     print(f"Running executable: {sys.executable}\n")
     deleteOldPyinstallerFolders()
     program = Program()

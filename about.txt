@@ -7,7 +7,9 @@ create an rSPR graph from a small set of trees.
 Graphviz must be installed to enable graph visualisation.
 
 Release notes v2.1:
-- Changed pathing to resource files and moved all external files to the dist folder
-- Program deletes old Pyinstaller temp folders (_MEI*** folders) that are over 1 hour old
+- Fixed pathing to third party executable resource files (Mac)
+- Program now deletes old Pyinstaller temp folders (_MEI*** folders) that are over 1 hour old
+- Recompiled rspr.exe and spr_dense_graph.exe resource files (Windows)
+- Bundled dynamic libraries with the program
 
 Python 3.8.6
